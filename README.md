@@ -201,6 +201,21 @@ MVP는 최소한 다음 상황을 지원해야 합니다.
 - API 명세: 개발 단계에서 추가 예정
 - 수업 운영 안내서: 시범 운영 전에 추가 예정
 
+## Supabase 백엔드 연결
+
+학생은 이메일과 비밀번호로 자신의 계정을 만들고 로그인합니다. 회원가입할 때 입력한 이름·6학년 반·번호는 학생 프로필에 저장되며, 각 학생은 RLS(Row Level Security) 정책에 따라 자신의 프로필과 학습 기록만 읽을 수 있습니다.
+
+1. Supabase 프로젝트의 **Authentication → Providers → Email** 로그인을 활성화합니다.
+2. Supabase **SQL Editor**에서 `web/supabase/schema.sql`을 실행합니다.
+3. `web/.env.example`을 참고하여 `web/.env.local`에 프로젝트 URL과 Publishable key를 입력합니다.
+
+```env
+VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
+```
+
+현재 저장되는 데이터는 학생 이름·학년·반·번호와 1차시의 현재 단계, 퀴즈 점수, 한 문장 정리, 완료 여부입니다. Service role key는 브라우저나 저장소에 절대 넣지 않습니다. 교사용 계정과 권한은 아직 구현하지 않았습니다.
+
 ## 현재 단계
 
 - [x] 10차시 수업 계획 정리
@@ -213,4 +228,3 @@ MVP는 최소한 다음 상황을 지원해야 합니다.
 - [ ] 데이터베이스 및 백엔드 연결
 - [ ] 전체 10차시 콘텐츠 구현
 - [ ] 학급 시범 운영
-

@@ -9,6 +9,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress';
+import { useStudentSession } from '@/lib/student-auth';
 
 const comparisons = [
   { label: '명령 방법', traditional: '정해진 문법으로 코드를 직접 작성해요.', ai: '원하는 결과를 자연어로 설명해요.' },
@@ -17,9 +18,12 @@ const comparisons = [
 ];
 
 export default function LessonTwoPage() {
+  const { loading: authLoading } = useStudentSession();
   const [step, setStep] = useState(1);
   const [choice, setChoice] = useState<string | null>(null);
   const progress = step * 25;
+
+  if (authLoading) return <div className="grid min-h-screen place-items-center bg-background"><p className="font-bold text-muted-foreground">학생 정보를 확인하는 중...</p></div>;
 
   return (
     <div className="min-h-screen bg-background">
