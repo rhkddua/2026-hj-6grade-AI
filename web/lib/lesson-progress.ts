@@ -6,6 +6,7 @@ export type LessonProgress = {
   quizScore: number | null;
   reflection: string;
   completed: boolean;
+  activityData?: Record<string, unknown>;
 };
 
 async function getStudentUserId() {
@@ -16,14 +17,15 @@ async function getStudentUserId() {
   return data.user.id;
 }
 
-export async function loadLessonProgress(lessonNo: number): Promise<LessonProgress | null> {
+export async function loadLessonProgress(lessonNo: number, includeActivities = false): Promise<LessonProgress | null> {
   if (!isSupabaseConfigured || !supabase) return null;
   const userId = await getStudentUserId();
   const { data, error } = await supabase
     .from('lesson_progress')
-    .select('lesson_no,current_step,quiz_score,reflection,completed')
+    .select(`lesson_no,current_step,quiz_score,reflection,completed${includeActivities ? ',activity_data' : ''}`)
     .eq('user_id', userId)
     .eq('lesson_no', lessonNo)
+    .returns<Array<{ lesson_no: number; current_step: number; quiz_score: number | null; reflection: string; completed: boolean; activity_data?: Record<string, unknown> }>>()
     .maybeSingle();
 
   if (error) throw error;
@@ -34,6 +36,7 @@ export async function loadLessonProgress(lessonNo: number): Promise<LessonProgre
     quizScore: data.quiz_score,
     reflection: data.reflection ?? '',
     completed: data.completed,
+    ...(includeActivities ? { activityData: data.activity_data } : {}),
   };
 }
 
@@ -48,6 +51,7 @@ export async function saveLessonProgress(progress: LessonProgress) {
       quiz_score: progress.quizScore,
       reflection: progress.reflection,
       completed: progress.completed,
+      ...(progress.activityData !== undefined ? { activity_data: progress.activityData } : {}),
       updated_at: new Date().toISOString(),
     },
     { onConflict: 'user_id,lesson_no' },

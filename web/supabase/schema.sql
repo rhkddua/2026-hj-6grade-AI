@@ -49,6 +49,7 @@ create table if not exists public.lesson_progress (
   quiz_score smallint check (quiz_score is null or quiz_score >= 0),
   reflection text not null default '' check (char_length(reflection) <= 1000),
   completed boolean not null default false,
+  activity_data jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   primary key (user_id, lesson_no)
