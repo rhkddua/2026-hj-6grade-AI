@@ -203,7 +203,7 @@ MVP는 최소한 다음 상황을 지원해야 합니다.
 
 ## Supabase 백엔드 연결
 
-학생은 이메일과 비밀번호로 자신의 계정을 만들고 로그인합니다. 회원가입할 때 입력한 이름·6학년 반·번호는 학생 프로필에 저장되며, 각 학생은 RLS(Row Level Security) 정책에 따라 자신의 프로필과 학습 기록만 읽을 수 있습니다.
+학생은 교사가 미리 생성한 이메일·비밀번호 계정으로 로그인합니다. Auth 계정과 별도로 `student_profiles`에 이름·6학년 반·번호를 저장하며, 각 학생은 RLS(Row Level Security) 정책에 따라 자신의 프로필과 학습 기록만 읽을 수 있습니다. 현재 1~4차시와 차시별 활동 데이터 저장·복원을 지원합니다. 테스트 계정 정보는 별도 문서인 [`TEST_ACCOUNT.md`](./TEST_ACCOUNT.md)에 둡니다.
 
 1. Supabase 프로젝트의 **Authentication → Providers → Email** 로그인을 활성화합니다.
 2. Supabase **SQL Editor**에서 `web/supabase/schema.sql`을 실행합니다.
@@ -214,7 +214,7 @@ VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
 ```
 
-현재 저장되는 데이터는 학생 이름·학년·반·번호와 1차시의 현재 단계, 퀴즈 점수, 한 문장 정리, 완료 여부입니다. Service role key는 브라우저나 저장소에 절대 넣지 않습니다. 교사용 계정과 권한은 아직 구현하지 않았습니다.
+현재 저장되는 데이터는 학생 이름·학년·반·번호와 차시별 현재 단계, 퀴즈 점수, 성찰, 완료 여부, `activity_data` JSON입니다. Service role key는 브라우저나 저장소에 절대 넣지 않습니다. 교사 대시보드는 목업이며, 학생 계정 생성은 Supabase Dashboard에서 진행합니다.
 
 ## 현재 단계
 

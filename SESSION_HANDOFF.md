@@ -289,3 +289,26 @@ type LessonFourActivities = {
 - 기존 공개 Sites 프로젝트에 새 버전 배포
 - 공개 URL에서 4차시 저장·복원 확인
 - 인수인계 문서와 Git 상태 갱신
+
+## 12. 4차시 구현 세션 결과 (2026-09-18)
+
+- 추가 파일: `web/app/lesson/4/page.tsx`, `web/app/lesson/4/content.tsx`, `web/lib/lesson-four.ts`
+- 홈에서 4차시 `/lesson/4` 진입을 활성화했다.
+- 3차시 패턴을 기준으로 `lesson_no = 4`, `activity_data` 자동 저장·복원, 저장 큐, 800ms 디바운스, 저장 실패 재시도, 완료 후 수정 시 완료 해제를 구현했다.
+- 활동 데이터는 요청 비교, 네 가지 단서 분류, 구체화 조건, 수정 요청, 퀴즈, `ownPrompt`를 포함한다.
+- `npm run build`: 성공. `/lesson/4` 라우트 생성 확인.
+- `npm run lint`: 기존 오류와 동일한 규칙 오류가 계속되며, 4차시에도 `role="status"` 관련 기존 규칙과 React Compiler/Hook 규칙 오류가 표시된다. 빌드는 정상이다.
+- 브라우저에서 미로그인 `/lesson/4`가 `/login`으로 이동하는 것을 확인했다.
+- 당시에는 테스트 계정이 없어 로그인 이후 E2E를 진행하지 못했으나, 아래 13절에서 계정 생성 후 로컬 로그인까지 확인했다.
+- 기존 공개 Sites 프로젝트에 원격 이력을 fetch·병합으로 보존한 뒤 새 source credential과 `credential.interactive=never` 일회성 Bearer 헤더로 push했다. 강제 push는 사용하지 않았다.
+- Sites version 9 저장 및 공개 배포 성공: `https://hj-ai-coding-class-2026.rhkdduavud.chatgpt.site`
+- 공개 URL에서 로그인 후 4차시 저장·복원 E2E가 다음 검증 작업으로 남아 있다.
+
+## 13. 테스트 계정 등록 결과 (2026-09-18)
+
+- 테스트 계정 정보는 별도 문서 [`TEST_ACCOUNT.md`](TEST_ACCOUNT.md)에 기록했다.
+- Supabase Auth에 테스트 사용자를 생성하고 자동 확인을 활성화했다.
+- `student_profiles`에 같은 `user_id`로 `테스트 학생`, 6학년 1반 49번 프로필을 등록했다.
+- 학생 번호 스키마 범위가 1~50이어서 최초 계획한 99번 대신 49번을 사용했다.
+- 비밀번호는 이 인수인계 문서에 기록하지 않는다.
+- 테스트 계정으로 로컬 `/login` 로그인 성공 및 홈에서 `테스트 학생`, 6학년 1반 49번 표시를 확인했다.
