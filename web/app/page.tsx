@@ -109,7 +109,7 @@ export default function HomePage() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {lessons.map((lesson) => (
-                <a href={lesson.no <= 2 ? `/lesson/${lesson.no}` : undefined} key={lesson.no} className={`lesson-card lesson-${lesson.status}`} aria-disabled={lesson.no > 2}>
+                <a href={lesson.no <= 3 ? `/lesson/${lesson.no}` : undefined} key={lesson.no} className={`lesson-card lesson-${lesson.status}`} aria-disabled={lesson.no > 3}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="lesson-number">{lesson.no}</div>
                     {lesson.status === 'done' && <CheckCircle2 className="size-5 text-emerald-600" />}

@@ -1,27 +1,18 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { ArrowRight, BookOpenCheck, CheckCircle2, Code2, LoaderCircle, LockKeyhole, Mail, UserRound } from 'lucide-react';
-
+import { ArrowRight, CheckCircle2, Code2, LoaderCircle, LockKeyhole, Mail, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { koreanAuthError } from '@/lib/student-auth';
+import { koreanAuthError } from '@/lib/auth-errors';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
-type Mode = 'login' | 'signup';
-
 export default function StudentLoginPage() {
-  const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [studentName, setStudentName] = useState('');
-  const [classNo, setClassNo] = useState('1');
-  const [studentNo, setStudentNo] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
 
   useEffect(() => {
     if (!supabase) return;
@@ -33,50 +24,20 @@ export default function StudentLoginPage() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
-    setNotice('');
     if (!supabase || !isSupabaseConfigured) {
       setError('로그인 서비스 연결을 확인하고 있습니다. 잠시 후 다시 시도해 주세요.');
       return;
     }
-    if (mode === 'signup' && password !== passwordConfirm) {
-      setError('비밀번호가 서로 다릅니다.');
-      return;
-    }
 
     setBusy(true);
-    if (mode === 'login') {
+    try {
       const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-      setBusy(false);
-      if (authError) setError(koreanAuthError(authError.message));
+      if (authError) setError(koreanAuthError(authError.message, authError.code));
       else window.location.replace('/');
-      return;
-    }
-
-    const parsedClassNo = Number(classNo);
-    const parsedStudentNo = Number(studentNo);
-    if (!studentName.trim() || parsedClassNo < 1 || parsedStudentNo < 1) {
+    } catch {
+      setError('서버에 연결하지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.');
+    } finally {
       setBusy(false);
-      setError('이름, 반, 번호를 모두 입력해 주세요.');
-      return;
-    }
-
-    const { data, error: authError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        data: { student_name: studentName.trim(), grade: 6, class_no: parsedClassNo, student_no: parsedStudentNo },
-      },
-    });
-    setBusy(false);
-    if (authError) {
-      setError(koreanAuthError(authError.message));
-    } else if (data.session) {
-      window.location.replace('/');
-    } else {
-      setNotice('가입 신청이 완료되었습니다. 이메일에서 확인 링크를 누른 뒤 로그인해 주세요.');
-      setMode('login');
-      setPassword('');
-      setPasswordConfirm('');
     }
   }
 
@@ -89,28 +50,17 @@ export default function StudentLoginPage() {
         </section>
 
         <section className="p-6 sm:p-10">
-          <div className="flex items-center gap-3 lg:hidden"><div className="grid size-10 place-items-center rounded-2xl bg-primary text-primary-foreground"><Code2 className="size-5" /></div><div><p className="font-heading text-lg font-black">AI 코딩 교실</p><p className="text-xs text-muted-foreground">학생 계정</p></div></div>
-          <div className="mt-8 flex rounded-2xl bg-muted p-1 lg:mt-0" role="tablist" aria-label="계정 메뉴">
-            <button type="button" role="tab" aria-selected={mode === 'login'} onClick={() => { setMode('login'); setError(''); }} className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-extrabold ${mode === 'login' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}>로그인</button>
-            <button type="button" role="tab" aria-selected={mode === 'signup'} onClick={() => { setMode('signup'); setError(''); }} className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-extrabold ${mode === 'signup' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}>처음 가입하기</button>
-          </div>
-
-          <div className="mt-7"><p className="text-sm font-bold text-primary">학생용</p><h2 className="mt-1 font-heading text-2xl font-black sm:text-3xl">{mode === 'login' ? '다시 만나서 반가워요!' : '나의 학생 계정을 만들어요'}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">{mode === 'login' ? '가입할 때 사용한 이메일과 비밀번호를 입력하세요.' : '교실에서 사용할 정보만 정확하게 입력하세요.'}</p></div>
+          <div className="flex items-center gap-3"><div className="grid size-10 place-items-center rounded-2xl bg-primary text-primary-foreground"><Code2 className="size-5" /></div><div><p className="font-heading text-lg font-black">AI 코딩 교실</p><p className="text-xs text-muted-foreground">학생 계정</p></div></div>
+          <div className="mt-8"><p className="text-sm font-bold text-primary">학생용</p><h1 className="mt-1 font-heading text-2xl font-black sm:text-3xl">수업 계정으로 로그인해요</h1><p className="mt-2 text-sm leading-6 text-muted-foreground">선생님에게 받은 이메일과 비밀번호를 입력하세요.</p></div>
+          <div className="mt-6 rounded-2xl bg-secondary/70 p-4 text-sm font-bold leading-6 text-secondary-foreground">학생 계정은 선생님이 미리 만들어 줍니다. 이 화면에서는 새 계정을 만들지 않아요.</div>
 
           <form className="mt-7 space-y-4" onSubmit={submit}>
-            {mode === 'signup' && <div className="grid gap-4 sm:grid-cols-[1fr_90px_90px]">
-              <div className="space-y-2"><Label htmlFor="student-name">이름</Label><Input id="student-name" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="홍길동" minLength={2} maxLength={30} required /></div>
-              <div className="space-y-2"><Label htmlFor="class-no">반</Label><Input id="class-no" type="number" value={classNo} onChange={(e) => setClassNo(e.target.value)} min={1} max={20} required /></div>
-              <div className="space-y-2"><Label htmlFor="student-no">번호</Label><Input id="student-no" type="number" value={studentNo} onChange={(e) => setStudentNo(e.target.value)} min={1} max={50} required /></div>
-            </div>}
-            <div className="space-y-2"><Label htmlFor="email">이메일</Label><div className="relative"><Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="student@example.com" className="pl-10" autoComplete="email" required /></div></div>
-            <div className="space-y-2"><Label htmlFor="password">비밀번호</Label><div className="relative"><LockKeyhole className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="6자 이상" className="pl-10" minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required /></div></div>
-            {mode === 'signup' && <div className="space-y-2"><Label htmlFor="password-confirm">비밀번호 확인</Label><Input id="password-confirm" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="같은 비밀번호를 한 번 더 입력" minLength={6} autoComplete="new-password" required /></div>}
+            <div className="space-y-2"><Label htmlFor="email">이메일</Label><div className="relative"><Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="선생님에게 받은 이메일" className="pl-10" autoComplete="username" required /></div></div>
+            <div className="space-y-2"><Label htmlFor="password">비밀번호</Label><div className="relative"><LockKeyhole className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="선생님에게 받은 비밀번호" className="pl-10" autoComplete="current-password" required /></div></div>
             {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-bold leading-6 text-red-700">{error}</p>}
-            {notice && <p className="rounded-xl bg-emerald-50 p-3 text-sm font-bold leading-6 text-emerald-800">{notice}</p>}
-            <Button type="submit" size="lg" className="w-full" disabled={busy}>{busy ? <><LoaderCircle className="animate-spin" />처리 중</> : <>{mode === 'login' ? <UserRound /> : <BookOpenCheck />}{mode === 'login' ? '로그인하기' : '학생 계정 만들기'}<ArrowRight /></>}</Button>
+            <Button type="submit" size="lg" className="w-full" disabled={busy}>{busy ? <><LoaderCircle className="animate-spin" />로그인 중</> : <><UserRound />로그인하기<ArrowRight /></>}</Button>
           </form>
-          <p className="mt-5 text-center text-xs leading-5 text-muted-foreground">비밀번호는 다른 사람에게 알려 주지 마세요. 계정 문제는 담임 선생님께 도움을 요청하세요.</p>
+          <p className="mt-5 text-center text-xs leading-5 text-muted-foreground">계정 또는 비밀번호에 문제가 있으면 담임 선생님께 도움을 요청하세요.</p>
         </section>
       </div>
     </main>

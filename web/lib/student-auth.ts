@@ -63,11 +63,4 @@ export async function signOutStudent() {
   window.location.replace('/login');
 }
 
-export function koreanAuthError(message: string) {
-  if (message.includes('Invalid login credentials')) return '이메일 또는 비밀번호를 다시 확인해 주세요.';
-  if (message.includes('User already registered')) return '이미 가입된 이메일입니다. 로그인해 주세요.';
-  if (message.includes('Database error saving new user')) return '이미 등록된 반·번호인지 확인해 주세요.';
-  if (message.includes('Password should be')) return '비밀번호는 6자 이상으로 만들어 주세요.';
-  if (message.includes('rate limit')) return '잠시 후 다시 시도해 주세요.';
-  return '처리하지 못했습니다. 입력 내용을 확인하고 다시 시도해 주세요.';
-}
+export { koreanAuthError } from './auth-errors';
