@@ -15,7 +15,7 @@ const lessons = [
   { no: 2, title: '전통 코딩과 AI 코딩', status: 'open' },
   { no: 3, title: 'AI는 무엇을 잘하고 못할까?', status: 'open' },
     { no: 4, title: 'AI에게 잘 지시하는 방법', status: 'open' },
-  { no: 5, title: 'Canva AI 코드 시작하기', status: 'locked' },
+  { no: 5, title: 'Canva AI 코드 시작하기', status: 'open' },
   { no: 6, title: '한 기능 앱 만들기', status: 'locked' },
   { no: 7, title: '앱 기능 설계하기', status: 'locked' },
   { no: 8, title: '두 기능 앱 만들기', status: 'locked' },
@@ -109,7 +109,7 @@ export default function HomePage() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {lessons.map((lesson) => (
-                  <a href={lesson.no <= 4 ? `/lesson/${lesson.no}` : undefined} key={lesson.no} className={`lesson-card lesson-${lesson.status}`} aria-disabled={lesson.no > 4}>
+                  <a href={lesson.no <= 5 ? `/lesson/${lesson.no}` : undefined} key={lesson.no} className={`lesson-card lesson-${lesson.status}`} aria-disabled={lesson.no > 5}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="lesson-number">{lesson.no}</div>
                     {lesson.status === 'done' && <CheckCircle2 className="size-5 text-emerald-600" />}
