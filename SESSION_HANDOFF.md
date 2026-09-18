@@ -6,17 +6,18 @@
 ## 1. 새 세션에서 가장 먼저 할 일
 
 1. 이 문서를 끝까지 읽는다.
-2. 작업 루트를 `C:\Users\rhkdd\OneDrive\문서\2학기 전학공\web`으로 둔다.
-3. `git status --short`로 아래 미커밋 변경이 그대로인지 확인한다. 사용자 변경을 reset/checkout으로 버리지 않는다.
-4. 기존 2차시 구현 패턴을 읽는다.
+2. Sites 전용 지침인 `web/AGENTS.md`를 읽고 이 사이트의 구현·검증·배포 절차에 적용한다.
+3. 작업 루트를 `C:\Users\rhkdd\OneDrive\문서\2학기 전학공\web`으로 둔다.
+4. `git status --short`로 아래 미커밋 변경이 그대로인지 확인한다. 사용자 변경을 reset/checkout으로 버리지 않는다.
+5. 기존 2차시 구현 패턴을 읽는다.
    - `web/app/lesson/2/page.tsx`
    - `web/app/lesson/2/content.tsx`
    - `web/lib/lesson-two.ts`
    - `web/lib/lesson-progress.ts`
-5. 3차시를 같은 구조로 구현한다.
-6. `npm run lint`와 `npm run build`를 실행한다.
-7. 로그인한 학생 계정으로 3차시 저장·새로고침 복원·완료 조건을 E2E 확인한다.
-8. 사용자 승인과 현재 설치된 Sites 스킬 지침에 따라 기존 Sites 프로젝트에 재배포한다.
+6. 3차시를 같은 구조로 구현한다.
+7. `npm run lint`와 `npm run build`를 실행한다.
+8. 로그인한 학생 계정으로 3차시 저장·새로고침 복원·완료 조건을 E2E 확인한다.
+9. 현재 설치된 Sites 스킬 지침에 따라 기존 Sites 프로젝트에 재배포한다.
 
 ## 2. 프로젝트 개요
 
@@ -434,4 +435,3 @@ type LessonThreeActivities = {
 - 공개 Sites 프로젝트에 새 버전 배포 성공
 - 공개 URL에서 로그인 후 3차시 E2E 검증 완료
 - 변경 파일과 원격 Supabase 변경 사항이 이 문서 또는 커밋 메시지에 반영됨
-
