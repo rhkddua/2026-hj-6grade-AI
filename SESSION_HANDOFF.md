@@ -1,7 +1,7 @@
 # AI 코딩 교실 웹사이트 — 세션 인수인계
 
 > 최종 갱신: 2026-09-18 (KST)  
-> 다음 세션 핵심 목표: **4차시 「AI에게 잘 지시하는 방법」 구현, 저장·복원 검증, 기존 공개 사이트 재배포**
+> 다음 세션 핵심 목표: **5차시 「Canva AI 코드 시작하기」 구현, 저장·복원 검증, 기존 공개 사이트 재배포**
 
 ## 1. 새 세션에서 바로 할 일
 
@@ -9,12 +9,15 @@
 2. 작업 루트를 `C:\Users\rhkdd\OneDrive\문서\2학기 전학공\web`으로 둔다.
 3. `web/AGENTS.md`와 그 세션에 설치된 `sites:sites-building`, `sites:sites-hosting` 지침을 읽는다.
 4. 상위 저장소에서 `git status --short`를 실행하고 사용자 변경을 reset/checkout하지 않는다.
-5. 3차시 구현 패턴을 우선 읽는다.
+5. 3·4차시 구현 패턴을 우선 읽는다.
    - `web/app/lesson/3/page.tsx`
    - `web/app/lesson/3/content.tsx`
    - `web/lib/lesson-three.ts`
+   - `web/app/lesson/4/page.tsx`
+   - `web/app/lesson/4/content.tsx`
+   - `web/lib/lesson-four.ts`
    - `web/lib/lesson-progress.ts`
-6. 같은 구조로 4차시를 구현하고 홈에서 `/lesson/4`를 연다.
+6. 같은 구조로 5차시를 구현하고 홈에서 `/lesson/5`를 연다.
 7. `npm run build`를 실행한다. lint는 아래의 기존 오류 상태를 참고한다.
 8. 로그인한 테스트 계정으로 저장·새로고침 복원·완료 해제까지 확인한다.
 9. 기존 Sites 프로젝트에 새 버전으로 재배포한다. 새 사이트를 만들지 않는다.
@@ -30,6 +33,7 @@
 - 1차시 「코딩은 어떻게 발전해 왔을까?」
 - 2차시 「전통적인 코딩과 AI 코딩」
 - 3차시 「AI는 무엇을 잘하고 못할까?」
+- 4차시 「AI에게 잘 지시하는 방법」
 - 이메일·비밀번호 학생 로그인
 - Supabase Authentication, 학생 프로필, 차시 진도와 활동 JSON 저장
 - 애플리케이션 수준 `super_admin` 역할과 RLS
@@ -54,7 +58,7 @@ GitHub:
 
 주의:
 
-- `web` 내부의 임시 중첩 `.git`은 3차시 배포 후 제거했다.
+- `web` 내부의 Sites 배포용 임시 중첩 `.git`은 version 9 배포 후 제거했다.
 - Sites 배포 시 소스 저장소가 별도 이력을 가지므로 임시 `web/.git`이 필요할 수 있다.
 - 임시 중첩 저장소를 만든 경우 배포가 끝나면 제거한다.
 - `.env.local`의 실제 키를 출력하거나 문서·커밋에 넣지 않는다.
@@ -81,7 +85,7 @@ npm run build
 - 미로그인 `/lesson/3` 접근 시 `/login` 이동 확인
 - `npm run lint`: 프로젝트 전체의 기존 오류 때문에 실패
 
-lint에는 기존 Shadcn 접근성 규칙, React Compiler 규칙, `import.meta.env` 타입, `ProgressValue` 사용, deprecated API 등이 포함된다. 4차시에서는 새 오류를 늘리지 않는 것을 우선하고 전체 lint 정리는 별도 범위로 둔다. build 실패는 반드시 수정한다.
+lint에는 기존 Shadcn 접근성 규칙, React Compiler 규칙, `import.meta.env` 타입, `ProgressValue` 사용, deprecated API 등이 포함된다. 5차시에서도 새 오류를 늘리지 않는 것을 우선하고 전체 lint 정리는 별도 범위로 둔다. build 실패는 반드시 수정한다.
 
 ## 5. Sites 배포 상태
 
@@ -90,8 +94,8 @@ lint에는 기존 Shadcn 접근성 규칙, React Compiler 규칙, `import.meta.e
 - 제목: `AI 코딩 교실`
 - 접근 모드: `public`
 - 공개 URL: <https://hj-ai-coding-class-2026.rhkdduavud.chatgpt.site>
-- 최신 배포: **version 8**, 성공
-- version 8에는 3차시와 당시 인증 관련 변경이 포함됨
+- 최신 배포: **version 9**, 성공
+- version 9에는 4차시와 테스트 계정 관련 운영 검증 전 단계의 소스가 포함됨
 - 설정: `web/.openai/hosting.json`
 
 운영 환경 변수는 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`다. `service_role` 키를 사용하지 않는다.
@@ -102,7 +106,7 @@ lint에는 기존 Shadcn 접근성 규칙, React Compiler 규칙, `import.meta.e
 - `get_site`로 기존 프로젝트와 공개 범위를 확인한다.
 - 기존 프로젝트 ID를 재사용하고 공개 범위를 바꾸지 않는다.
 - 소스 push → 전체 SHA 확인 → 빌드 → 패키징 → 버전 저장 → 공개 배포 순서를 따른다.
-- Windows에서 공식 `package-site.mjs`가 `bash` 부재로 실패할 수 있다. 3차시는 내부 `prepare-site-build.cjs`로 staging 후 `tar`로 동일 구조를 만들었다.
+- Windows에서 공식 `package-site.mjs`가 `bash` 부재로 실패할 수 있다. version 9 배포는 내부 `prepare-site-build.cjs`로 staging 후 `tar`로 동일 구조를 만들어 성공했다.
 - 아카이브에는 `dist/server/index.js`와 `dist/.openai/hosting.json`이 있어야 한다.
 - 임시 인증 토큰, 아카이브, staging 디렉터리를 남기지 않는다.
 
@@ -122,7 +126,7 @@ lint에는 기존 Shadcn 접근성 규칙, React Compiler 규칙, `import.meta.e
 - `current_step`, `quiz_score`, `reflection`, `completed`
 - `activity_data jsonb`
 - 학생은 자신의 행만 SELECT/INSERT/UPDATE
-- 4차시는 새 테이블 없이 `lesson_no = 4`와 `activity_data`를 사용한다.
+- 4·5차시는 새 테이블 없이 각각 `lesson_no = 4/5`와 `activity_data`를 사용한다.
 
 적용된 마이그레이션:
 
@@ -149,7 +153,7 @@ type LessonProgress = {
 }
 ```
 
-4차시는 `loadLessonProgress(4, true)`와 `saveLessonProgress({ lessonNo: 4, ... })`를 사용한다.
+4·5차시는 각각 `loadLessonProgress(4/5, true)`와 `saveLessonProgress({ lessonNo: 4/5, ... })`를 사용한다.
 
 `web/app/lesson/3/page.tsx`의 저장 패턴:
 
@@ -167,8 +171,8 @@ type LessonProgress = {
 
 홈 `web/app/page.tsx`:
 
-- 현재 1~3차시 링크 활성화: `lesson.no <= 3`
-- 4차시 구현 후 `lesson.no <= 4`, `aria-disabled={lesson.no > 4}`로 변경
+- 현재 1~4차시 링크 활성화: `lesson.no <= 4`
+- 5차시 구현 후 `lesson.no <= 5`, `aria-disabled={lesson.no > 5}`로 변경
 - 4차시 제목은 이미 「AI에게 잘 지시하는 방법」으로 등록됨
 - 전체 진도와 현재 차시 표시는 하드코딩 상태이며 이번 범위에서 전면 개편하지 않아도 됨
 
@@ -249,20 +253,13 @@ type LessonFourActivities = {
 
 ## 9. 4차시 검증 체크리스트
 
-- [ ] 미로그인 `/lesson/4` 접근 시 `/login` 이동
-- [ ] 로그인 후 5단계 이동 가능
-- [ ] 키보드로 라디오·체크박스·버튼 조작 가능
-- [ ] 변경 후 약 800ms 뒤 저장 상태 표시
-- [ ] 새로고침 후 단계와 모든 `activity_data` 복원
-- [ ] 오답·미완료 상태에서는 완료 불가
-- [ ] 완료 시 `lesson_no = 4`, 점수, 성찰, `completed = true` 저장
-- [ ] 완료 후 답이나 글 수정 시 `completed = false`
-- [ ] 저장 실패 시 오류와 재시도 표시
-- [ ] 모바일에서 가로 넘침·버튼 잘림 없음
-- [ ] 홈에서 4차시 진입 가능
-- [ ] build 성공 및 `/lesson/4` 라우트 확인
-- [ ] 기존 공개 Sites 프로젝트 배포 성공
-- [ ] 공개 URL에서 로그인 후 저장·복원 확인
+- [x] 미로그인 `/lesson/4` 접근 시 `/login` 이동
+- [x] 홈에서 4차시 진입 가능
+- [x] build 성공 및 `/lesson/4` 라우트 확인
+- [x] 기존 공개 Sites 프로젝트 version 9 배포 성공
+- [x] 테스트 계정 생성 및 로컬 로그인·프로필 표시 확인
+- [ ] 공개 URL에서 로그인 후 4차시 저장·복원 확인
+- [ ] 로그인 후 5단계 전체 활동과 완료 해제까지 공개 URL에서 확인
 
 ## 10. 범위 밖의 알려진 문제
 
@@ -279,16 +276,29 @@ type LessonFourActivities = {
 
 ## 11. 다음 세션 완료 기준
 
-- `/lesson/4` 수업 내용과 상호작용 구현
+- `/lesson/5` 「Canva AI 코드 시작하기」 수업 내용과 상호작용 구현
 - 학생별 자동 저장과 새로고침 복원
-- 퀴즈·직접 작성·성찰·완료 조건 저장
+- 퀴즈·제작 지시·테스트 결과·성찰·완료 조건 저장
 - 완료 후 수정 시 완료 상태 해제
-- 홈에서 4차시 진입 가능
-- build 성공 및 `/lesson/4` 확인
+- 홈에서 5차시 진입 가능
+- build 성공 및 `/lesson/5` 확인
 - 실제 계정 E2E 검증
 - 기존 공개 Sites 프로젝트에 새 버전 배포
-- 공개 URL에서 4차시 저장·복원 확인
+- 공개 URL에서 4·5차시 저장·복원 확인
 - 인수인계 문서와 Git 상태 갱신
+
+## 14. 다음 세션 5차시 구현 지침
+
+- 차시명: **「Canva AI 코드 시작하기」**
+- 대상: 6학년 학생. 4차시에서 배운 목표·상황·조건·결과 형식을 실제 앱 제작 지시에 적용한다.
+- 권장 5단계: (1) Canva AI 코드가 하는 일 알아보기, (2) 만들 앱의 사용자·문제·핵심 기능 정하기, (3) 안전하고 구체적인 제작 지시 작성하기, (4) 준비된 결과를 테스트하고 수정 지시하기, (5) 3문항 퀴즈·제작 계획·성찰.
+- 실제 외부 AI/Canva 호출을 필수로 만들지 말고, 수업 흐름 안에서 준비된 예시와 시뮬레이션으로 학습 가능하게 한다. 외부 서비스로 이동하는 링크가 필요하면 학생에게 개인정보를 입력하지 않도록 안내한다.
+- 4차시와 같은 `loadLessonProgress(5, true)` / `saveLessonProgress()` 및 `activity_data` JSON 구조를 사용한다. 새 차시 전용 테이블이나 새 인증 방식을 만들지 않는다.
+- 권장 활동 데이터는 앱 주제, 사용자, 핵심 기능, 제작 지시문, 테스트 결과, 수정 지시, 퀴즈 답안과 성찰을 포함하며 `restoreActivities()`에서 배열 길이·숫자 범위·boolean·문자열 길이를 검증한다.
+- 완료 조건은 모든 필수 선택 활동 확인, 퀴즈 정답 확인, 안전한 제작 지시문 작성, 테스트 결과와 수정 계획 작성, 성찰 10자 이상으로 명시한다.
+- 학생 홈에서 5차시 링크를 활성화하고, `/lesson/5` 미로그인 보호·자동 저장·새로고침 복원·완료 해제를 확인한다.
+- 구현 후 `npm run build`, 실제 테스트 계정의 로컬/공개 URL 로그인 E2E, 기존 Sites 프로젝트 version 저장·공개 배포까지 진행한다. 배포 시 원격 Git 이력을 fetch·병합으로 보존하고 강제 push하지 않는다.
+- 테스트 계정과 비밀번호는 루트 `TEST_ACCOUNT.md`에만 기록한다. `SESSION_HANDOFF.md`, 코드, 로그, 원격 URL에는 비밀번호를 넣지 않는다.
 
 ## 12. 4차시 구현 세션 결과 (2026-09-18)
 
