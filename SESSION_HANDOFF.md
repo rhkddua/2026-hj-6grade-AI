@@ -27,9 +27,9 @@
 
 - Sites 프로젝트 ID: `appgprj_6a962dcd21f08191876edad89331f7c3`
 - 접근 범위: `public`
-- 최신 배포: **version 23**, `active`
-- Sites 소스 커밋: `07b41fa8705bef33a80b6defd67ccb8648587928`
-- version 23에서 관련 소스 lint와 `npm run build`가 성공했다.
+- 최신 배포: **version 24**, `active`
+- Sites 소스 커밋: `63076ba7ab84b64ba5ffe4db4dc603cc160ae9fc`
+- version 24에서 관련 소스 lint와 `npm run build`가 성공했다.
 - 공개 URL에서 학생 로그인, 8~10차시 저장·복원·완료 해제·재완료, 학생/관리자 권한 분리, 관리자 최신 집계와 CSV를 확인했다.
 - 학생과 관리자 테스트 세션은 로그아웃 상태로 마쳤다.
 
@@ -60,6 +60,9 @@
 
 ## 6. 최근 수정 사항
 
+- 최고관리자 콘솔의 대시보드·학생 현황·차시별 진도를 앵커 링크가 아닌 실제 독립 뷰로 전환하도록 수정했다. 데스크톱 사이드바와 모바일 메뉴, 키보드 Enter, 해시 직접 링크·새로고침을 지원한다.
+- 공개 version 24에서 학생 현황 데이터, 8·10차시 완료율, 모바일 390px 가로 넘침 없음과 관리자 로그아웃을 확인했다.
+- version 24 배포용 `.site-stage-63076ba`와 `site-63076ba7ab84b64ba5ffe4db4dc603cc160ae9fc.tar.gz`는 정확한 경계를 확인했지만 실행 정책이 삭제를 차단해 남아 있다. 다음 세션은 이 두 항목을 사용자 변경과 구분해 처리한다.
 - 8·9·10차시의 로드 실패 재시도 버튼이 오류 상태를 먼저 해제하도록 수정했다.
 - `lesson-progress.ts`의 deprecated 단건 조회 타입 지정을 `overrideTypes(..., { merge: false })`로 교체했다.
 - version 23 배포용으로 새로 만든 staging과 archive는 삭제했다.
