@@ -409,3 +409,18 @@ type LessonFourActivities = {
 - `web/.env.example`과 `web/AGENTS.md`는 중첩 Sites 저장소 기준 수정 상태다. 사용자 변경으로 간주하고 임의로 되돌리지 않는다.
 - 테스트 계정 정보는 루트 `TEST_ACCOUNT.md`에서만 읽는다. 비밀번호를 코드, 로그, 이 문서, 사용자 메시지에 복사하지 않는다. 브라우저 검증 후 학생·관리자 세션을 로그인 상태로 남기지 않는다.
 - 다음 세션 첫 지시문은 루트 `NEXT_SESSION_PROMPT.md`에 준비했다.
+
+## 25. 전체 회귀 점검·version 23 배포 결과 (2026-09-21)
+
+- 미로그인 상태에서 `/`, `/lesson/1`, `/lesson/8`, `/lesson/9`, `/lesson/10`은 `/login`으로, `/admin`은 `/admin/login`으로 이동하는 것을 공개 URL에서 확인했다.
+- 학생 로그인 후 홈의 1~10차시 링크가 모두 열려 있고, `/admin` 접근은 `/admin/login?reason=unauthorized`로 차단되며 학생 세션도 종료되는 것을 확인했다.
+- 8·9·10차시에서 단계 이동, 800ms 자동 저장, 저장 상태 표시, 새로고침 복원, 미완료·오답 완료 차단, 완료 저장, 완료 후 수정 시 `completed = false` 해제와 재완료를 공개 URL에서 확인했다. 각 차시는 기존 `lesson_progress`의 정확한 `lesson_no`와 `activity_data`만 사용하며 새 테이블은 추가하지 않았다.
+- 로드 실패 화면의 `다시 시도` 버튼이 `loadError`를 해제하지 않아 성공한 재시도 뒤에도 오류 화면에 머물 수 있는 문제를 8·9·10차시에서 수정했다. 재시도 시 오류 상태를 먼저 해제하고 재로딩 상태를 안내한 뒤 다시 조회한다.
+- `web/lib/lesson-progress.ts`의 Supabase 단건 조회 타입 지정은 deprecated `returns()` 대신 `overrideTypes(..., { merge: false })`를 사용하도록 정리했다.
+- 최고관리자 전용 로그인, 학생 로그인과의 양방향 전환, 비관리자 접근 차단, 관리자 대시보드의 1~10차시 집계·학생 상세·검색·필터·완료율·CSV UI를 확인했다. 테스트 완료 뒤에는 관리자 비밀번호가 `TEST_ACCOUNT.md`에 없어 새 8~10차시 기록을 관리자 세션으로 다시 열어 최신 행까지 재확인하지 못했다.
+- 데스크톱과 390×844 모바일 폭에서 주요 화면의 가로 넘침이 없고, 10차시 라디오 선택과 Enter 키 조작, 상태·오류 문구, 개인정보 비요구 안내를 확인했다.
+- 8~10차시·관리자·인증·진도 관련 소스 범위 `oxlint`가 성공했고, `npm run build`도 성공하여 `/`, `/login`, `/admin`, `/admin/login`, `/lesson/1`~`/lesson/10`, `/teacher` 라우트 생성을 확인했다.
+- 중첩 Sites 저장소 커밋 `07b41fa8705bef33a80b6defd67ccb8648587928`을 원격 이력과 병합된 상태로 강제 push 없이 `main`에 push했다.
+- 기존 프로젝트 ID와 `public` 접근 범위를 유지한 **version 23**을 배포했다. 프로젝트는 `active`, 최신 버전은 23이며 공개 주소는 `https://hj-ai-coding-class-2026.rhkdduavud.chatgpt.site`다.
+- 배포 후 공개 version 23에서 학생 로그인, 8차시 기존 완료 기록 복원, 성찰 수정의 800ms 자동 저장, 완료 해제, 새로고침 내용 복원, 재완료 저장과 완료 상태 재복원을 다시 확인했다. 학생과 관리자 세션은 모두 로그아웃 상태로 마쳤다.
+- 이번 version 23 배포용으로 새로 만든 `.site-stage-07b41fa`와 `site-07b41fa8705bef33a80b6defd67ccb8648587928.tar.gz`는 정확한 경계를 확인했으나 현재 실행 정책이 삭제 명령을 차단해 남아 있다. 이전 세션의 staging·archive와 `web/.git`도 사용자 변경 보존 원칙에 따라 건드리지 않았다.

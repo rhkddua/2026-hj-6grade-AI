@@ -63,7 +63,7 @@ export default function LessonTenPage() {
   async function home() { const version = revision.current; if (version !== savedRevision.current && !(await persist(latest.current, version))) return; if (version === revision.current) window.location.assign('/'); }
 
   if (authLoading || (!loaded && !loadError)) return <div className="grid min-h-screen place-items-center"><output>학습 기록을 불러오는 중…</output></div>;
-  if (loadError) return <main className="mx-auto max-w-xl space-y-5 p-8"><h1 className="text-2xl font-black">학습 기록을 불러오지 못했어요</h1><p>기존 기록을 보호하기 위해 활동을 시작하지 않았어요. 인터넷 연결을 확인해 주세요.</p><Button onClick={() => setLoadAttempt(value => value + 1)}>다시 불러오기</Button><Link href="/" className="ml-5 underline">수업 홈</Link></main>;
+  if (loadError) return <main className="mx-auto max-w-xl space-y-5 p-8"><h1 className="text-2xl font-black">학습 기록을 불러오지 못했어요</h1><p>기존 기록을 보호하기 위해 활동을 시작하지 않았어요. 인터넷 연결을 확인해 주세요.</p><Button onClick={() => { setLoadError(false); setStatus('학습 기록을 다시 불러오는 중…'); setLoadAttempt(value => value + 1); }}>다시 불러오기</Button><Link href="/" className="ml-5 underline">수업 홈</Link></main>;
 
   const titles = ['무엇을 안전하게 공유할까?', '내 앱을 이해하기 쉽게 소개하기', '도움이 되는 피드백 찾기', '피드백을 개선 계획으로 바꾸기', '10차시 배움 확인하기'];
   const labels = ['안전한 공유 방법 확인', '개인정보 없는 발표 카드 확인', '구체적이고 도움이 되는 피드백 구별', '개선 계획과 최종 점검 완료', '퀴즈 3문항 모두 정답 확인', '성찰 10자 이상 작성'];

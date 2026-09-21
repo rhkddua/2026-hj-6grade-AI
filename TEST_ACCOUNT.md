@@ -10,3 +10,10 @@
 - Supabase Auth 사용자 ID: `7d440378-ea63-4bc9-a40e-0a36229577cd`
 
 계정은 Supabase에 실제 생성되었으며, 공개 Site 검증에 사용할 수 있습니다. 테스트 종료 후에는 필요하지 않을 때 비활성화하거나 삭제하세요.
+
+## 최고관리자 테스트 계정
+
+- 관리자 이메일: superadmin@hj-ai-class.com
+- 관리자 비밀번호: godwjdch604!!
+- 권한: `super_admin`
+- 용도: 공개 사이트 관리자 회귀 테스트

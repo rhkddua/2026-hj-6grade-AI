@@ -25,8 +25,8 @@ export async function loadLessonProgress(lessonNo: number, includeActivities = f
     .select(`lesson_no,current_step,quiz_score,reflection,completed${includeActivities ? ',activity_data' : ''}`)
     .eq('user_id', userId)
     .eq('lesson_no', lessonNo)
-    .returns<Array<{ lesson_no: number; current_step: number; quiz_score: number | null; reflection: string; completed: boolean; activity_data?: Record<string, unknown> }>>()
-    .maybeSingle();
+    .maybeSingle()
+    .overrideTypes<{ lesson_no: number; current_step: number; quiz_score: number | null; reflection: string; completed: boolean; activity_data?: Record<string, unknown> }, { merge: false }>();
 
   if (error) throw error;
   if (!data) return null;

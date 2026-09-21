@@ -144,7 +144,7 @@ export default function LessonEightPage() {
   }
 
   if (authLoading || (!loaded && !loadError)) return <div className="grid min-h-screen place-items-center"><output>학습 기록을 불러오는 중…</output></div>;
-  if (loadError) return <main className="mx-auto max-w-xl space-y-5 p-8"><h1 className="text-2xl font-black">학습 기록을 불러오지 못했어요</h1><p>기존 기록을 보호하기 위해 활동을 시작하지 않았어요. 인터넷 연결을 확인해 주세요.</p><Button onClick={() => setLoadAttempt(value => value + 1)}>다시 불러오기</Button><Link href="/" className="ml-5 underline">수업 홈</Link></main>;
+  if (loadError) return <main className="mx-auto max-w-xl space-y-5 p-8"><h1 className="text-2xl font-black">학습 기록을 불러오지 못했어요</h1><p>기존 기록을 보호하기 위해 활동을 시작하지 않았어요. 인터넷 연결을 확인해 주세요.</p><Button onClick={() => { setLoadError(false); setStatus('학습 기록을 다시 불러오는 중…'); setLoadAttempt(value => value + 1); }}>다시 불러오기</Button><Link href="/" className="ml-5 underline">수업 홈</Link></main>;
 
   const titles = ['두 기능은 어떻게 이어질까?', '기능 사이의 값 정하기', '두 기능 제작 지시 쓰기', '여러 상황으로 테스트하고 고치기', '배움 확인하기'];
   const labels = ['두 기능 연결 의미 확인', '첫 기능·전달 값·두 번째 기능 흐름 확인', '안전한 두 기능 제작 지시 확인', '세 가지 상황 테스트와 수정 계획 확인', '퀴즈 3문항 모두 정답 확인', '성찰 10자 이상 작성'];

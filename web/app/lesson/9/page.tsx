@@ -144,7 +144,7 @@ export default function LessonNinePage() {
   }
 
   if (authLoading || (!loaded && !loadError)) return <div className="grid min-h-screen place-items-center"><output>학습 기록을 불러오는 중…</output></div>;
-  if (loadError) return <main className="mx-auto max-w-xl space-y-5 p-8"><h1 className="text-2xl font-black">학습 기록을 불러오지 못했어요</h1><p>기존 기록을 보호하기 위해 활동을 시작하지 않았어요. 인터넷 연결을 확인해 주세요.</p><Button onClick={() => setLoadAttempt(value => value + 1)}>다시 불러오기</Button><Link href="/" className="ml-5 underline">수업 홈</Link></main>;
+  if (loadError) return <main className="mx-auto max-w-xl space-y-5 p-8"><h1 className="text-2xl font-black">학습 기록을 불러오지 못했어요</h1><p>기존 기록을 보호하기 위해 활동을 시작하지 않았어요. 인터넷 연결을 확인해 주세요.</p><Button onClick={() => { setLoadError(false); setStatus('학습 기록을 다시 불러오는 중…'); setLoadAttempt(value => value + 1); }}>다시 불러오기</Button><Link href="/" className="ml-5 underline">수업 홈</Link></main>;
 
   const titles = ['나에게 필요한 문제는 무엇일까?', '사용자·문제·두 기능 정하기', '나의 앱 제작 지시 완성하기', '사용자 피드백으로 개선하기', '배움 확인하기'];
   const labels = ['생활 속 문제 선택 확인', '사용자·문제·두 기능 계획 확인', '안전한 앱 이름과 제작 지시 확인', '사용자 테스트와 수정 계획 확인', '퀴즈 3문항 모두 정답 확인', '성찰 10자 이상 작성'];
