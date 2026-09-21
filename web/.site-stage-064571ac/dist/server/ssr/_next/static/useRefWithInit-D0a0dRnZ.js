@@ -1,0 +1,1 @@
+import{f as e,h as t,m as n}from"../../index.js";var r=n({useRefWithInit:()=>o}),i=t(e(),1),a={};function o(e,t){let n=i.useRef(a);return n.current===a&&(n.current=e(t)),n}export{r as n,o as t};

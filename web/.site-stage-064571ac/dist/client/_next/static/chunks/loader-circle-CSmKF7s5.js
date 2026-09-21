@@ -1,0 +1,1 @@
+import{s as e}from"./auth-errors-BntjN4Bw.js";var t=e(`loader-circle`,[[`path`,{d:`M21 12a9 9 0 1 1-6.219-8.56`,key:`13zald`}]]);export{t};

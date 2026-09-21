@@ -39,11 +39,24 @@ export function useStudentSession() {
         .eq('user_id', nextUser.id)
         .maybeSingle();
       if (!active) return;
+      if (!data) {
+        const { data: staff } = await supabase!
+          .from('staff_profiles')
+          .select('role')
+          .eq('user_id', nextUser.id)
+          .eq('role', 'super_admin')
+          .maybeSingle<{ role: string }>();
+        if (!active) return;
+        if (staff) {
+          window.location.replace('/admin');
+          return;
+        }
+      }
       setProfile(data);
       setLoading(false);
     }
 
-    supabase.auth.getUser().then(({ data }) => void applyUser(data.user));
+    void supabase.auth.getUser().then(({ data }) => void applyUser(data.user));
     const { data: listener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') window.location.replace('/login');
     });

@@ -1,0 +1,1 @@
+import{n as e}from"./navigation-errors-BS-_haKU.js";import"./navigation.react-server-BEP_meE8.js";function t(){e(`/admin`)}export{t as default};

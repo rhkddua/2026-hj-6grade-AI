@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { SyntheticEvent, useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle2, Code2, LoaderCircle, LockKeyhole, Mail, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,16 +12,23 @@ export default function StudentLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const [switchingMode, setSwitchingMode] = useState(false);
   const [error, setError] = useState('');
+
+  async function switchToAdminLogin() {
+    setSwitchingMode(true);
+    if (supabase) await supabase.auth.signOut();
+    window.location.assign('/admin/login');
+  }
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getUser().then(({ data }) => {
+    void supabase.auth.getUser().then(({ data }) => {
       if (data.user && !data.user.is_anonymous) window.location.replace('/');
     });
   }, []);
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
     if (!supabase || !isSupabaseConfigured) {
@@ -32,8 +39,20 @@ export default function StudentLoginPage() {
     setBusy(true);
     try {
       const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-      if (authError) setError(koreanAuthError(authError.message, authError.code));
-      else window.location.replace('/');
+      if (authError) {
+        setError(koreanAuthError(authError.message, authError.code));
+      } else {
+        const { data: userData } = await supabase.auth.getUser();
+        const { data: staff } = userData.user
+          ? await supabase
+              .from('staff_profiles')
+              .select('role')
+              .eq('user_id', userData.user.id)
+              .eq('role', 'super_admin')
+              .maybeSingle<{ role: string }>()
+          : { data: null };
+        window.location.replace(staff ? '/admin' : '/');
+      }
     } catch {
       setError('서버에 연결하지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.');
     } finally {
@@ -61,6 +80,7 @@ export default function StudentLoginPage() {
             <Button type="submit" size="lg" className="w-full" disabled={busy}>{busy ? <><LoaderCircle className="animate-spin" />로그인 중</> : <><UserRound />로그인하기<ArrowRight /></>}</Button>
           </form>
           <p className="mt-5 text-center text-xs leading-5 text-muted-foreground">계정 또는 비밀번호에 문제가 있으면 담임 선생님께 도움을 요청하세요.</p>
+          <div className="mt-5 border-t pt-5 text-center"><button type="button" onClick={switchToAdminLogin} disabled={switchingMode} className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline disabled:cursor-wait disabled:opacity-60"><LockKeyhole className="size-4" />{switchingMode ? '관리자 로그인으로 이동 중' : '관리자 로그인'}</button></div>
         </section>
       </div>
     </main>

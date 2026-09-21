@@ -1,0 +1,350 @@
+{
+  "_Button-B8clVKBd.js": {
+    "file": "_next/static/chunks/Button-B8clVKBd.js",
+    "name": "Button",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_useIsoLayoutEffect-nZu_bODY.js",
+      "_useRefWithInit-CzhAHkGJ.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_Icon-D0zGVybZ.js": {
+    "file": "_next/static/chunks/Icon-D0zGVybZ.js",
+    "name": "Icon",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_auth-errors-BntjN4Bw.js": {
+    "file": "_next/static/chunks/auth-errors-BntjN4Bw.js",
+    "name": "auth-errors",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_useBaseUiId-BrQkHZxN.js",
+      "_Button-B8clVKBd.js",
+      "_Icon-D0zGVybZ.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_code-xml-x2K_7JWZ.js": {
+    "file": "_next/static/chunks/code-xml-x2K_7JWZ.js",
+    "name": "code-xml",
+    "imports": [
+      "_auth-errors-BntjN4Bw.js"
+    ]
+  },
+  "_framework-D_rUT4EX.js": {
+    "file": "_next/static/chunks/framework-D_rUT4EX.js",
+    "name": "framework",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js"
+    ]
+  },
+  "_lesson-progress-CfsCn2t-.js": {
+    "file": "_next/static/chunks/lesson-progress-CfsCn2t-.js",
+    "name": "lesson-progress",
+    "imports": [
+      "_auth-errors-BntjN4Bw.js"
+    ]
+  },
+  "_loader-circle-CSmKF7s5.js": {
+    "file": "_next/static/chunks/loader-circle-CSmKF7s5.js",
+    "name": "loader-circle",
+    "imports": [
+      "_auth-errors-BntjN4Bw.js"
+    ]
+  },
+  "_lock-keyhole-DDL49aiZ.js": {
+    "file": "_next/static/chunks/lock-keyhole-DDL49aiZ.js",
+    "name": "lock-keyhole",
+    "imports": [
+      "_auth-errors-BntjN4Bw.js"
+    ]
+  },
+  "_rolldown-runtime-C60lm6uB.js": {
+    "file": "_next/static/chunks/rolldown-runtime-C60lm6uB.js",
+    "name": "rolldown-runtime"
+  },
+  "_shadowDom-IGhiJvSL.js": {
+    "file": "_next/static/chunks/shadowDom-IGhiJvSL.js",
+    "name": "shadowDom",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_Button-B8clVKBd.js",
+      "_useIsoLayoutEffect-nZu_bODY.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_sparkles-DrtXwuiX.js": {
+    "file": "_next/static/chunks/sparkles-DrtXwuiX.js",
+    "name": "sparkles",
+    "imports": [
+      "_auth-errors-BntjN4Bw.js"
+    ]
+  },
+  "_student-auth-BHyuBsdq.js": {
+    "file": "_next/static/chunks/student-auth-BHyuBsdq.js",
+    "name": "student-auth",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_auth-errors-BntjN4Bw.js",
+      "_useBaseUiId-BrQkHZxN.js",
+      "_useIsoLayoutEffect-nZu_bODY.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_textarea-BUaqdAnB.js": {
+    "file": "_next/static/chunks/textarea-BUaqdAnB.js",
+    "name": "textarea",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_useBaseUiId-BrQkHZxN.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_useBaseUiId-BrQkHZxN.js": {
+    "file": "_next/static/chunks/useBaseUiId-BrQkHZxN.js",
+    "name": "useBaseUiId",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_useIsoLayoutEffect-nZu_bODY.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_useIsoLayoutEffect-nZu_bODY.js": {
+    "file": "_next/static/chunks/useIsoLayoutEffect-nZu_bODY.js",
+    "name": "useIsoLayoutEffect",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_useRefWithInit-CzhAHkGJ.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_useRefWithInit-CzhAHkGJ.js": {
+    "file": "_next/static/chunks/useRefWithInit-CzhAHkGJ.js",
+    "name": "useRefWithInit",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "app/lesson/1/page.tsx": {
+    "file": "_next/static/chunks/page-B6pPzsZO.js",
+    "name": "page",
+    "src": "app/lesson/1/page.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_student-auth-BHyuBsdq.js",
+      "_auth-errors-BntjN4Bw.js",
+      "components/ui/progress.tsx",
+      "_lesson-progress-CfsCn2t-.js",
+      "_code-xml-x2K_7JWZ.js",
+      "_sparkles-DrtXwuiX.js",
+      "_loader-circle-CSmKF7s5.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "app/lesson/2/page.tsx": {
+    "file": "_next/static/chunks/page-BRZ39ZWc.js",
+    "name": "page",
+    "src": "app/lesson/2/page.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_student-auth-BHyuBsdq.js",
+      "_auth-errors-BntjN4Bw.js",
+      "components/ui/progress.tsx",
+      "_textarea-BUaqdAnB.js",
+      "_lesson-progress-CfsCn2t-.js",
+      "_useBaseUiId-BrQkHZxN.js",
+      "_Button-B8clVKBd.js",
+      "_shadowDom-IGhiJvSL.js",
+      "_useIsoLayoutEffect-nZu_bODY.js",
+      "_useRefWithInit-CzhAHkGJ.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "app/lesson/3/page.tsx": {
+    "file": "_next/static/chunks/page-WKe7cyHo.js",
+    "name": "page",
+    "src": "app/lesson/3/page.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_student-auth-BHyuBsdq.js",
+      "_auth-errors-BntjN4Bw.js",
+      "components/ui/progress.tsx",
+      "_textarea-BUaqdAnB.js",
+      "_lesson-progress-CfsCn2t-.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "app/lesson/4/page.tsx": {
+    "file": "_next/static/chunks/page-Ch70vrKC.js",
+    "name": "page",
+    "src": "app/lesson/4/page.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_student-auth-BHyuBsdq.js",
+      "_auth-errors-BntjN4Bw.js",
+      "components/ui/progress.tsx",
+      "_textarea-BUaqdAnB.js",
+      "_lesson-progress-CfsCn2t-.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "app/lesson/5/page.tsx": {
+    "file": "_next/static/chunks/page-DGYZv47n.js",
+    "name": "page",
+    "src": "app/lesson/5/page.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_student-auth-BHyuBsdq.js",
+      "_auth-errors-BntjN4Bw.js",
+      "components/ui/progress.tsx",
+      "_textarea-BUaqdAnB.js",
+      "_lesson-progress-CfsCn2t-.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "app/lesson/6/page.tsx": {
+    "file": "_next/static/chunks/page-BYcspbPG.js",
+    "name": "page",
+    "src": "app/lesson/6/page.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_student-auth-BHyuBsdq.js",
+      "_auth-errors-BntjN4Bw.js",
+      "components/ui/progress.tsx",
+      "_textarea-BUaqdAnB.js",
+      "_lesson-progress-CfsCn2t-.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "app/lesson/7/page.tsx": {
+    "file": "_next/static/chunks/page-BSC2MQVG.js",
+    "name": "page",
+    "src": "app/lesson/7/page.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_student-auth-BHyuBsdq.js",
+      "_auth-errors-BntjN4Bw.js",
+      "components/ui/progress.tsx",
+      "_textarea-BUaqdAnB.js",
+      "_lesson-progress-CfsCn2t-.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "app/login/page.tsx": {
+    "file": "_next/static/chunks/page-C73gpceP.js",
+    "name": "page",
+    "src": "app/login/page.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_auth-errors-BntjN4Bw.js",
+      "_useBaseUiId-BrQkHZxN.js",
+      "_Button-B8clVKBd.js",
+      "_shadowDom-IGhiJvSL.js",
+      "_useIsoLayoutEffect-nZu_bODY.js",
+      "_useRefWithInit-CzhAHkGJ.js",
+      "_code-xml-x2K_7JWZ.js",
+      "_loader-circle-CSmKF7s5.js",
+      "_lock-keyhole-DDL49aiZ.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "app/page.tsx": {
+    "file": "_next/static/chunks/page-C1xywbGw.js",
+    "name": "page",
+    "src": "app/page.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_student-auth-BHyuBsdq.js",
+      "_auth-errors-BntjN4Bw.js",
+      "components/ui/progress.tsx",
+      "_code-xml-x2K_7JWZ.js",
+      "_sparkles-DrtXwuiX.js",
+      "_lock-keyhole-DDL49aiZ.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "components/ui/progress.tsx": {
+    "file": "_next/static/chunks/progress-DptR4CW_.js",
+    "name": "progress",
+    "src": "components/ui/progress.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_useBaseUiId-BrQkHZxN.js",
+      "_useIsoLayoutEffect-nZu_bODY.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "node_modules/vinext/dist/shims/internal/app-route-prefetch-policy.js": {
+    "file": "_next/static/chunks/app-route-prefetch-policy-eMxYSvIL.js",
+    "name": "app-route-prefetch-policy",
+    "src": "node_modules/vinext/dist/shims/internal/app-route-prefetch-policy.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "virtual:vinext-app-browser-entry"
+    ]
+  },
+  "node_modules/vinext/dist/shims/layout-segment-context.js": {
+    "file": "_next/static/chunks/layout-segment-context-BbOH-pTC.js",
+    "name": "layout-segment-context",
+    "src": "node_modules/vinext/dist/shims/layout-segment-context.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "virtual:vinext-app-browser-entry",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "node_modules/vinext/dist/shims/streamed-icons.js": {
+    "file": "_next/static/chunks/streamed-icons-DD-j-qoc.js",
+    "name": "streamed-icons",
+    "src": "node_modules/vinext/dist/shims/streamed-icons.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "virtual:vinext-app-browser-entry": {
+    "file": "_next/static/chunks/index-BrznuMkX.js",
+    "name": "index",
+    "src": "virtual:vinext-app-browser-entry",
+    "isEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_framework-D_rUT4EX.js"
+    ],
+    "dynamicImports": [
+      "node_modules/vinext/dist/shims/internal/app-route-prefetch-policy.js",
+      "virtual:vinext-app-browser-entry",
+      "components/ui/progress.tsx",
+      "node_modules/vinext/dist/shims/layout-segment-context.js",
+      "_useRefWithInit-CzhAHkGJ.js",
+      "_Icon-D0zGVybZ.js",
+      "app/lesson/2/page.tsx",
+      "_Button-B8clVKBd.js",
+      "app/lesson/3/page.tsx",
+      "app/page.tsx",
+      "node_modules/vinext/dist/shims/streamed-icons.js",
+      "app/lesson/7/page.tsx",
+      "app/login/page.tsx",
+      "app/lesson/1/page.tsx",
+      "app/lesson/4/page.tsx",
+      "app/lesson/5/page.tsx",
+      "app/lesson/6/page.tsx"
+    ]
+  }
+}
