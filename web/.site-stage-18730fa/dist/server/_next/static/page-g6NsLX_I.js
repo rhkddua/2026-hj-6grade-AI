@@ -1,0 +1,1 @@
+import{t as e}from"./rsc-CUdfaCA3.js";var t=e(()=>{throw Error(`Unexpectedly client reference export 'default' is called on server`)},`ae8ee3b29989`,`default`);export{t as default};

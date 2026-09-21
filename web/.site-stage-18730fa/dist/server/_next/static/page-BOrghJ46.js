@@ -1,0 +1,1 @@
+import{n as e}from"./navigation-errors-BXv6K9OH.js";import"./navigation.react-server-DzPgOPTF.js";function t(){e(`/admin`)}export{t as default};

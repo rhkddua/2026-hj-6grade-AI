@@ -15,7 +15,7 @@ import { Progress } from '@/components/ui/progress';
 import { signOutAdmin, useAdminSession } from '@/lib/admin-auth';
 import { AdminProgress, AdminStudent, loadAdminDashboard } from '@/lib/admin-dashboard';
 
-const ACTIVE_LESSONS = 7;
+const ACTIVE_LESSONS = 10;
 
 function formatDate(value: string | null) {
   if (!value) return '활동 없음';

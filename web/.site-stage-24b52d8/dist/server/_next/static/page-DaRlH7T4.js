@@ -1,0 +1,1 @@
+import{n as e}from"./navigation-errors-CoUBa6mr.js";import"./navigation.react-server-DbxQgMP3.js";function t(){e(`/admin`)}export{t as default};
