@@ -4,9 +4,11 @@
 
 학생은 코딩의 발전 과정과 AI의 특징을 배우고, 좋은 지시문을 작성한 뒤 Canva AI 코드로 자신에게 필요한 앱을 제작합니다. 교사는 학급별 차시 공개, 진행 상황 확인, 결과물 관리와 피드백을 한곳에서 수행할 수 있습니다.
 
-> 현재 상태: 1~4차시 구현, Supabase 저장·복원 및 공개 Sites version 9 배포 완료  
-> 다음 구현 대상: 5차시 「Canva AI 코드 시작하기」  
-> 상세 요구사항: [PRD.md](./PRD.md)
+> 현재 상태: 1~10차시, Supabase 저장·복원, 최고관리자 대시보드 구현 및 공개 Sites version 23 배포 완료
+>
+> 다음 작업: 차시별 콘텐츠와 활동 세부 조정
+>
+> 작업 시작 문서: [SESSION_HANDOFF.md](./SESSION_HANDOFF.md), [LESSON_EDITING_GUIDE.md](./LESSON_EDITING_GUIDE.md)
 
 ## 프로젝트 목표
 
@@ -196,7 +198,10 @@ MVP는 최소한 다음 상황을 지원해야 합니다.
 
 ## 문서
 
-- [제품 요구사항 문서](./PRD.md)
+- [현재 작업 인수인계](./SESSION_HANDOFF.md)
+- [차시별 콘텐츠 편집 가이드](./LESSON_EDITING_GUIDE.md)
+- [새 세션 첫 지시문](./NEXT_SESSION_PROMPT.md)
+- [제품 요구사항 문서](./PRD.md) — 제품 범위 참고용이며 일반 편집 세션에서는 필요할 때만 읽습니다.
 - 화면 설계 문서: 개발 단계에서 추가 예정
 - 데이터베이스 설계 문서: 개발 단계에서 추가 예정
 - API 명세: 개발 단계에서 추가 예정
@@ -204,7 +209,7 @@ MVP는 최소한 다음 상황을 지원해야 합니다.
 
 ## Supabase 백엔드 연결
 
-학생은 교사가 미리 생성한 이메일·비밀번호 계정으로 로그인합니다. Auth 계정과 별도로 `student_profiles`에 이름·6학년 반·번호를 저장하며, 각 학생은 RLS(Row Level Security) 정책에 따라 자신의 프로필과 학습 기록만 읽을 수 있습니다. 현재 1~4차시와 차시별 활동 데이터 저장·복원을 지원합니다. 테스트 계정 정보는 별도 문서인 [`TEST_ACCOUNT.md`](./TEST_ACCOUNT.md)에 둡니다.
+학생은 교사가 미리 생성한 이메일·비밀번호 계정으로 로그인합니다. Auth 계정과 별도로 `student_profiles`에 이름·6학년 반·번호를 저장하며, 각 학생은 RLS(Row Level Security) 정책에 따라 자신의 프로필과 학습 기록만 읽을 수 있습니다. 현재 1~10차시와 차시별 활동 데이터 저장·복원을 지원합니다. 테스트 계정 정보는 별도 문서인 [`TEST_ACCOUNT.md`](./TEST_ACCOUNT.md)에 둡니다.
 
 1. Supabase 프로젝트의 **Authentication → Providers → Email** 로그인을 활성화합니다.
 2. Supabase **SQL Editor**에서 `web/supabase/schema.sql`을 실행합니다.
@@ -215,17 +220,18 @@ VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
 ```
 
-현재 저장되는 데이터는 학생 이름·학년·반·번호와 차시별 현재 단계, 퀴즈 점수, 성찰, 완료 여부, `activity_data` JSON입니다. Service role key는 브라우저나 저장소에 절대 넣지 않습니다. 교사 대시보드는 목업이며, 학생 계정 생성은 Supabase Dashboard에서 진행합니다.
+현재 저장되는 데이터는 학생 이름·학년·반·번호와 차시별 현재 단계, 퀴즈 점수, 성찰, 완료 여부, `activity_data` JSON입니다. Service role key는 브라우저나 저장소에 절대 넣지 않습니다. 최고관리자 대시보드는 1~10차시 집계와 학생 상세·검색·필터·CSV를 제공하며, 학생 계정 생성은 Supabase Dashboard에서 진행합니다.
 
 ## 현재 단계
 
 - [x] 10차시 수업 계획 정리
 - [x] 제품 요구사항 문서 작성
 - [x] 프로젝트 README 작성
-- [ ] 개발 전 결정사항 확정
-- [ ] 기술 스택 확정
-- [ ] 화면 흐름 및 디자인 시안 작성
-- [ ] 작동 시제품 개발
-- [ ] 데이터베이스 및 백엔드 연결
-- [ ] 전체 10차시 콘텐츠 구현
+- [x] 개발 전 결정사항 확정
+- [x] 기술 스택 확정
+- [x] 화면 흐름 및 디자인 시안 작성
+- [x] 작동 시제품 개발
+- [x] 데이터베이스 및 백엔드 연결
+- [x] 전체 10차시 콘텐츠 구현
+- [ ] 차시별 콘텐츠·활동 세부 조정
 - [ ] 학급 시범 운영
