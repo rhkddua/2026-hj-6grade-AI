@@ -3,7 +3,7 @@
 > 개발·E2E 테스트 전용 계정입니다. 운영 학생 계정으로 사용하지 않습니다.
 
 - 이메일: `ai-class-e2e-20260918@hj-ai-class.test`
-- 임시 비밀번호: godwjdch604!
+- 임시 비밀번호: `HjAiE2E!2026#Lesson4`
 - 용도: 로그인, 차시별 저장·복원, 완료 처리 및 공개 Site E2E 검증
 - 생성 대상: Supabase Authentication 학생 계정
 - 프로필: 테스트 학생 / 6학년 1반 49번
