@@ -1,0 +1,1 @@
+import{n as e}from"./navigation-errors-Bnx72i-D.js";import"./navigation.react-server-BGLPk6jd.js";function t(){e(`/admin`)}export{t as default};
