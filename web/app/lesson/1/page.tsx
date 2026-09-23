@@ -70,10 +70,10 @@ const mathRounds = [
   },
   {
     name: '어셈블리어', icon: Terminal, accent: 'bg-blue-100 text-blue-700',
-    prompt: '짧은 영어 명령으로 같은 계산을 해 보세요.',
-    hint: 'LOAD는 숫자 불러오기, ADD는 더하기, PRINT는 결과 보여 주기예요. 세 명령을 차례로 입력해요.',
-    placeholder: 'LOAD 3\nADD 2\nPRINT',
-    guide: ['LOAD 3', 'ADD 2', 'PRINT'],
+    prompt: '컴퓨터 안의 계산 방 A를 사용해 같은 계산을 해 보세요.',
+    hint: '어셈블리어는 컴퓨터 내부의 계산 방 A를 직접 사용해요. 세 명령을 차례로 입력해 보세요.',
+    placeholder: 'MOV A, #3\nADD A, #2\nOUT A',
+    guide: ['MOV A, #3', 'ADD A, #2', 'OUT A'],
   },
   {
     name: '고급 언어 · JavaScript', icon: Code2, accent: 'bg-violet-100 text-violet-700',
@@ -90,10 +90,21 @@ function isMathInputCorrect(index: number, input: string) {
       === '0001 0011\n0010 0010\n1111 0000';
   }
   if (index === 1) {
-    return input.trim().split(/\r?\n/).map((line) => line.trim().replace(/\s+/g, ' ').toUpperCase()).join('\n')
-      === 'LOAD 3\nADD 2\nPRINT';
+    return normalizeInstructionLines(input) === 'MOV A, #3\nADD A, #2\nOUT A';
   }
   return /^console\.log\(\s*3\s*\+\s*2\s*\)\s*;?$/i.test(input.trim());
+}
+
+function normalizeInstructionLines(input: string) {
+  return input.trim().split(/\r?\n/).map((line) => line.trim().replace(/\s+/g, ' ').toUpperCase()).join('\n');
+}
+
+function assemblyInputStep(input: string) {
+  const lines = normalizeInstructionLines(input).split('\n');
+  if (lines[0] !== 'MOV A, #3') return 0;
+  if (lines[1] !== 'ADD A, #2') return 1;
+  if (lines[2] !== 'OUT A') return 2;
+  return 3;
 }
 
 const quizItems = [
@@ -109,6 +120,7 @@ type LessonOneActivities = {
   gameChecked: boolean[];
   gameSolved: boolean[];
   activeGameRound: number;
+  studioView: 'movement' | 'math';
   mathInputs: string[];
   mathChecked: boolean[];
   mathSolved: boolean[];
@@ -124,6 +136,7 @@ const initialActivities: LessonOneActivities = {
   gameChecked: languageRounds.map(() => false),
   gameSolved: languageRounds.map(() => false),
   activeGameRound: 0,
+  studioView: 'movement',
   mathInputs: mathRounds.map(() => ''),
   mathChecked: mathRounds.map(() => false),
   mathSolved: mathRounds.map(() => false),
@@ -150,9 +163,12 @@ function restoreActivities(value: Record<string, unknown> | undefined): LessonOn
     : languageRounds.map(() => false);
   const activeGameRound = typeof value.activeGameRound === 'number' && Number.isInteger(value.activeGameRound)
     ? Math.max(0, Math.min(languageRounds.length - 1, value.activeGameRound)) : 0;
-  const mathInputs = Array.isArray(value.mathInputs) && value.mathInputs.length === mathRounds.length
+  const studioView = value.studioView === 'math' ? 'math' : 'movement';
+  const restoredMathInputs = Array.isArray(value.mathInputs) && value.mathInputs.length === mathRounds.length
     ? value.mathInputs.map((input) => typeof input === 'string' ? input.slice(0, 120) : '')
     : mathRounds.map(() => '');
+  const mathInputs = restoredMathInputs.map((input, index) => index === 1 && normalizeInstructionLines(input) === 'LOAD 3\nADD 2\nPRINT'
+    ? 'MOV A, #3\nADD A, #2\nOUT A' : input);
   const mathChecked = Array.isArray(value.mathChecked) && value.mathChecked.length === mathRounds.length
     ? value.mathChecked.map((checked) => checked === true)
     : mathRounds.map(() => false);
@@ -170,6 +186,7 @@ function restoreActivities(value: Record<string, unknown> | undefined): LessonOn
     gameChecked,
     gameSolved,
     activeGameRound,
+    studioView,
     mathInputs,
     mathChecked,
     mathSolved,
@@ -199,11 +216,13 @@ export default function LessonOnePage() {
   const [status, setStatus] = useState('학습 기록을 불러오는 중…');
   const [saveError, setSaveError] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [assemblyPlaybackStep, setAssemblyPlaybackStep] = useState<number | null>(null);
   const userId = user?.id;
   const queue = useRef(Promise.resolve());
   const revision = useRef(0);
   const savedRevision = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const assemblyTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
   const heading = useRef<HTMLHeadingElement>(null);
 
   const progress = completed ? 100 : (step - 1) * 20;
@@ -211,6 +230,8 @@ export default function LessonOnePage() {
   const quizScore = useMemo(() => quizItems.filter((item, index) => activities.quizAnswers[index] === item.answer).length, [activities.quizAnswers]);
   const gameComplete = activities.gameSolved.every(Boolean);
   const mathComplete = activities.mathSolved.every(Boolean);
+  const typedAssemblyStep = assemblyInputStep(activities.mathInputs[1]);
+  const visibleAssemblyStep = assemblyPlaybackStep ?? typedAssemblyStep;
   const requirements = [gameComplete, mathComplete, activities.quizChecked && quizScore === quizItems.length, reflection.trim().length >= 10];
   const snapshot: LessonProgress = useMemo(() => ({
     lessonNo: 1,
@@ -223,6 +244,8 @@ export default function LessonOnePage() {
   const latest = useRef(snapshot);
 
   useEffect(() => { latest.current = snapshot; }, [snapshot]);
+
+  useEffect(() => () => { assemblyTimers.current.forEach((playbackTimer) => clearTimeout(playbackTimer)); }, []);
 
   useEffect(() => {
     if (!userId) return;
@@ -322,6 +345,11 @@ export default function LessonOnePage() {
     const checked = activities.mathChecked.map((value, itemIndex) => itemIndex === index ? true : value);
     const solved = activities.mathSolved.map((value, itemIndex) => itemIndex === index ? isMathInputCorrect(index, activities.mathInputs[index]) : value);
     update({ mathChecked: checked, mathSolved: solved });
+    if (index === 1 && solved[index]) {
+      assemblyTimers.current.forEach((playbackTimer) => clearTimeout(playbackTimer));
+      setAssemblyPlaybackStep(0);
+      assemblyTimers.current = [1, 2, 3].map((playbackStep) => setTimeout(() => setAssemblyPlaybackStep(playbackStep), playbackStep * 500));
+    }
   }
 
   async function finishLesson() {
@@ -413,8 +441,21 @@ export default function LessonOnePage() {
           {step === 3 && (
             <div>
               <div className="mt-3 grid size-12 place-items-center rounded-2xl bg-violet-100 text-violet-700"><Gamepad2 className="size-6" /></div>
-              <h2 ref={heading} tabIndex={-1} className="mt-5 font-heading text-2xl font-black outline-none sm:text-3xl">캐릭터를 움직이고 수학을 계산해요</h2>
-              <p className="mt-3 text-base leading-7 text-muted-foreground">먼저 네 가지 언어로 캐릭터를 움직인 뒤, 세 가지 언어를 직접 입력해 3 + 2를 계산해 보세요. 모든 활동에 예시와 힌트가 있어요.</p>
+              <h2 ref={heading} tabIndex={-1} className="mt-5 font-heading text-2xl font-black outline-none sm:text-3xl">게임·수학 코딩 실험실</h2>
+              <p className="mt-3 text-base leading-7 text-muted-foreground">두 활동을 한 화면씩 차례로 진행해요. 아래에서 시작할 활동을 선택하세요.</p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2" role="tablist" aria-label="코딩 실험실 활동 선택">
+                <button type="button" role="tab" aria-selected={activities.studioView === 'movement'} aria-controls="movement-lab" onClick={() => update({ studioView: 'movement' })} className={`rounded-3xl border-2 p-5 text-left transition-colors focus-visible:ring-2 focus-visible:ring-primary ${activities.studioView === 'movement' ? 'border-violet-500 bg-violet-50 text-violet-950' : 'border-border hover:bg-muted/50'}`}>
+                  <span className="flex items-center justify-between gap-3"><span className="grid size-11 place-items-center rounded-2xl bg-violet-100 text-violet-700"><Gamepad2 className="size-5" /></span>{gameComplete ? <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100"><CheckCircle2 />완료</Badge> : <Badge variant="outline">{activities.gameSolved.filter(Boolean).length} / 4</Badge>}</span>
+                  <span className="mt-4 block text-lg font-black">1. 캐릭터 움직이기</span><span className="mt-1 block text-sm leading-6 text-muted-foreground">명령을 골라 캐릭터를 목표까지 이동해요.</span>
+                </button>
+                <button type="button" role="tab" aria-selected={activities.studioView === 'math'} aria-controls="math-lab" onClick={() => update({ studioView: 'math' })} className={`rounded-3xl border-2 p-5 text-left transition-colors focus-visible:ring-2 focus-visible:ring-primary ${activities.studioView === 'math' ? 'border-emerald-500 bg-emerald-50 text-emerald-950' : 'border-border hover:bg-muted/50'}`}>
+                  <span className="flex items-center justify-between gap-3"><span className="grid size-11 place-items-center rounded-2xl bg-emerald-100 text-emerald-700"><Calculator className="size-5" /></span>{mathComplete ? <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100"><CheckCircle2 />완료</Badge> : <Badge variant="outline">{activities.mathSolved.filter(Boolean).length} / 3</Badge>}</span>
+                  <span className="mt-4 block text-lg font-black">2. 수학 계산하기</span><span className="mt-1 block text-sm leading-6 text-muted-foreground">세 언어를 직접 입력해 3 + 2를 계산해요.</span>
+                </button>
+              </div>
+
+              {activities.studioView === 'movement' && <section id="movement-lab" role="tabpanel" className="mt-6" aria-labelledby="movement-lab-title">
+              <h3 id="movement-lab-title" className="sr-only">캐릭터 움직이기 활동</h3>
               <div className="mt-6 rounded-2xl border bg-violet-50/60 p-5"><p className="font-black text-violet-950">게임 속 실제 이야기</p><p className="mt-2 text-sm leading-7 text-violet-950/85">1999년에 나온 ‘롤러코스터 타이쿤’은 많은 손님과 놀이기구를 빠르게 움직이기 위해 코드의 대부분을 x86 어셈블리어로 만들었어요. 언어마다 장점과 쓰임이 다르다는 사례예요.</p><a href="https://www.chrissawyergames.com/faq.htm" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-violet-800 underline decoration-violet-400 underline-offset-4">개발자 공식 FAQ 열기<ExternalLink className="size-4" /></a></div>
               <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4" role="tablist" aria-label="게임 언어 선택">{languageRounds.map((round, index) => <button key={round.name} type="button" role="tab" aria-selected={activities.activeGameRound === index} onClick={() => update({ activeGameRound: index })} className={`rounded-2xl border px-3 py-3 text-sm font-black focus-visible:ring-2 focus-visible:ring-primary ${activities.activeGameRound === index ? 'border-primary bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}><span className="flex items-center justify-center gap-1.5">{activities.gameSolved[index] ? <CheckCircle2 className="size-4 text-emerald-700" /> : <round.icon className="size-4" />}{index + 1}. {round.name}</span></button>)}</div>
               <div role="tabpanel" className="mt-4 rounded-3xl border-2 border-primary/20 p-4 sm:p-6">
@@ -427,8 +468,10 @@ export default function LessonOnePage() {
                 {activeChecked && <output aria-live="polite" className={`mt-4 block rounded-2xl p-4 text-sm font-bold leading-6 ${activeSolved ? 'bg-emerald-50 text-emerald-800' : 'bg-orange-50 text-orange-800'}`}>{activeSolved ? activeRound.success : `아직 출발점이에요. ${activeRound.hint}`}</output>}
               </div>
               {gameComplete && <output className="mt-5 block rounded-2xl bg-teal-50 p-5 text-teal-950"><span className="font-black">네 언어 탐험 완료!</span><span className="mt-1 block text-sm leading-6">같은 움직임도 기계어는 0과 1, 어셈블리어는 짧은 영어, 고급 언어는 함수, 블록 코딩은 뜻이 보이는 블록으로 나타낼 수 있어요.</span></output>}
+              <Button className="mt-5" variant={gameComplete ? 'default' : 'outline'} onClick={() => update({ studioView: 'math' })}>2. 수학 계산하기로 이동<ArrowRight /></Button>
+              </section>}
 
-              <section className="mt-9 border-t pt-8" aria-labelledby="math-lab-title">
+              {activities.studioView === 'math' && <section id="math-lab" role="tabpanel" className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50/30 p-4 sm:p-6" aria-labelledby="math-lab-title">
                 <div className="flex items-start gap-3">
                   <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-emerald-100 text-emerald-700"><Calculator className="size-5" /></span>
                   <div><p className="text-sm font-bold text-emerald-700">직접 입력 활동</p><h3 id="math-lab-title" className="text-xl font-black sm:text-2xl">세 가지 언어로 3 + 2 계산하기</h3></div>
@@ -439,13 +482,24 @@ export default function LessonOnePage() {
                     const RoundIcon = round.icon;
                     const checked = activities.mathChecked[index];
                     const solved = activities.mathSolved[index];
+                    const isAssembly = index === 1;
                     return (
                       <article key={round.name} className="rounded-3xl border p-4 sm:p-6">
                         <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><span className={`grid size-10 place-items-center rounded-xl ${round.accent}`}><RoundIcon className="size-5" /></span><div><p className="text-xs font-bold text-muted-foreground">계산 미션 {index + 1} / 3</p><h4 className="text-lg font-black">{round.name}</h4></div></div>{solved && <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100"><CheckCircle2 />5 계산 완료</Badge>}</div>
                         <p className="mt-4 text-base font-bold leading-7">{round.prompt}</p>
-                        <div className="mt-3 flex gap-3 rounded-2xl bg-amber-50 p-4 text-amber-950"><Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" /><div className="min-w-0"><p className="text-sm leading-6"><strong>힌트:</strong> {round.hint}</p><div className="mt-2 flex flex-wrap gap-2">{round.guide.map((item) => <code key={item} className="rounded-lg bg-white/80 px-2 py-1 text-xs sm:text-sm">{item}</code>)}</div></div></div>
+                        {isAssembly ? <div className="mt-3 flex gap-3 rounded-2xl bg-amber-50 p-4 text-amber-950"><Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" /><div className="min-w-0"><p className="text-sm font-bold leading-6">힌트: 어셈블리어는 컴퓨터 내부의 계산 방 <code className="rounded bg-white px-1.5 py-0.5">A</code>를 직접 사용해요!</p><ul className="mt-3 space-y-2 text-sm leading-6"><li><code className="font-bold">MOV A, #숫자</code>: 계산 방 A에 숫자를 넣어요. <span className="text-amber-800">#은 진짜 숫자라는 표시예요.</span></li><li><code className="font-bold">ADD A, #숫자</code>: 계산 방 A의 값에 숫자를 더해요.</li><li><code className="font-bold">OUT A</code>: 계산 방 A에 남은 결과를 화면에 보여 줘요.</li></ul></div></div> : <div className="mt-3 flex gap-3 rounded-2xl bg-amber-50 p-4 text-amber-950"><Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" /><div className="min-w-0"><p className="text-sm leading-6"><strong>힌트:</strong> {round.hint}</p><div className="mt-2 flex flex-wrap gap-2">{round.guide.map((item) => <code key={item} className="rounded-lg bg-white/80 px-2 py-1 text-xs sm:text-sm">{item}</code>)}</div></div></div>}
                         <label htmlFor={`math-input-${index}`} className="mt-4 block text-sm font-black">명령을 직접 입력하세요.</label>
-                        <textarea id={`math-input-${index}`} value={activities.mathInputs[index]} onChange={(event) => { const inputs = activities.mathInputs.map((input, itemIndex) => itemIndex === index ? event.target.value : input); const nextChecked = activities.mathChecked.map((value, itemIndex) => itemIndex === index ? false : value); const nextSolved = activities.mathSolved.map((value, itemIndex) => itemIndex === index ? false : value); update({ mathInputs: inputs, mathChecked: nextChecked, mathSolved: nextSolved }); }} placeholder={round.placeholder} spellCheck={false} autoCapitalize="off" className="mt-2 min-h-24 w-full resize-y rounded-xl border bg-slate-950 p-3 font-mono text-base leading-7 text-teal-200 outline-none focus:border-primary focus:ring-3 focus:ring-primary/15" maxLength={120} />
+                        <textarea id={`math-input-${index}`} value={activities.mathInputs[index]} onChange={(event) => { if (index === 1) { assemblyTimers.current.forEach((playbackTimer) => clearTimeout(playbackTimer)); setAssemblyPlaybackStep(null); } const inputs = activities.mathInputs.map((input, itemIndex) => itemIndex === index ? event.target.value : input); const nextChecked = activities.mathChecked.map((value, itemIndex) => itemIndex === index ? false : value); const nextSolved = activities.mathSolved.map((value, itemIndex) => itemIndex === index ? false : value); update({ mathInputs: inputs, mathChecked: nextChecked, mathSolved: nextSolved }); }} placeholder={round.placeholder} spellCheck={false} autoCapitalize="off" className="mt-2 min-h-24 w-full resize-y rounded-xl border bg-slate-950 p-3 font-mono text-base leading-7 text-teal-200 outline-none focus:border-primary focus:ring-3 focus:ring-primary/15" maxLength={120} />
+                        {isAssembly && <div className="mt-4 overflow-hidden rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4 sm:p-5" aria-label="어셈블리어 실행 모습" aria-live="polite">
+                          <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-xs font-bold text-blue-700">컴퓨터 내부 들여다보기</p><p className="mt-1 font-black text-blue-950">명령에 따라 계산 방 A가 변해요</p></div><Badge variant="outline" className="bg-white">실행 {visibleAssemblyStep} / 3</Badge></div>
+                          <ol className="mt-4 grid gap-2 sm:grid-cols-3">{['MOV A, #3', 'ADD A, #2', 'OUT A'].map((command, commandIndex) => <li key={command} className={`rounded-xl border px-3 py-2 text-center font-mono text-xs font-bold transition-all duration-500 ${visibleAssemblyStep > commandIndex ? 'border-blue-500 bg-blue-600 text-white shadow-sm' : 'border-blue-200 bg-white text-blue-900'}`}>{visibleAssemblyStep > commandIndex ? '✓ ' : `${commandIndex + 1}. `}{command}</li>)}</ol>
+                          <div className="mt-4 grid items-stretch gap-3 sm:grid-cols-[1fr_auto_1fr]">
+                            <div className="rounded-2xl border-2 border-blue-300 bg-white p-4 text-center"><p className="text-xs font-bold text-blue-700">계산 방</p><div className={`mx-auto mt-2 grid min-h-28 max-w-36 place-items-center rounded-2xl border-4 transition-all duration-500 ${visibleAssemblyStep >= 1 ? 'scale-100 border-blue-500 bg-blue-50 shadow-lg' : 'scale-95 border-dashed border-slate-300 bg-slate-50'}`}><span><span className="block text-sm font-black text-blue-700">[ A ]</span><span className="mt-1 block text-4xl font-black text-blue-950">{visibleAssemblyStep === 0 ? '–' : visibleAssemblyStep === 1 ? '3' : '5'}</span></span></div></div>
+                            <div className="hidden items-center text-2xl font-black text-blue-400 sm:flex">→</div>
+                            <div className={`rounded-2xl border-2 p-4 text-center transition-all duration-500 ${visibleAssemblyStep >= 3 ? 'border-emerald-400 bg-slate-950 text-white shadow-lg' : 'border-dashed border-slate-300 bg-white/70 text-slate-500'}`}><p className="text-xs font-bold">화면 출력</p><div className="mt-2 grid min-h-28 place-items-center"><span className={`text-5xl font-black transition-all duration-500 ${visibleAssemblyStep >= 3 ? 'scale-100 text-emerald-300' : 'scale-75 text-slate-300'}`}>{visibleAssemblyStep >= 3 ? '5' : '?'}</span></div></div>
+                          </div>
+                          <p className="mt-3 text-center text-sm font-bold text-blue-950">{visibleAssemblyStep === 0 ? '첫 줄을 입력하면 A가 준비돼요.' : visibleAssemblyStep === 1 ? 'MOV 실행: 계산 방 A에 3이 들어갔어요.' : visibleAssemblyStep === 2 ? 'ADD 실행: A의 3에 2를 더해 5가 되었어요.' : 'OUT 실행: 계산 결과 5가 화면에 나타났어요!'}</p>
+                        </div>}
                         <Button className="mt-3" disabled={!activities.mathInputs[index].trim()} onClick={() => runMathCommand(index)}><Calculator />계산하기</Button>
                         {checked && <output aria-live="polite" className={`mt-3 block rounded-2xl p-4 text-sm font-bold leading-6 ${solved ? 'bg-emerald-50 text-emerald-800' : 'bg-orange-50 text-orange-800'}`}>{solved ? `정확해요! ${round.name} 명령으로 3 + 2 = 5를 계산했어요.` : `아직 결과가 나오지 않았어요. 힌트의 명령을 순서와 기호까지 살펴보고 다시 입력해 보세요.`}</output>}
                       </article>
@@ -453,7 +507,8 @@ export default function LessonOnePage() {
                   })}
                 </div>
                 {mathComplete && <output className="mt-5 block rounded-2xl bg-violet-50 p-5 text-violet-950"><span className="font-black">세 가지 계산 미션 완료!</span><span className="mt-1 block text-sm leading-6">같은 3 + 2 계산도 기계어, 어셈블리어, JavaScript에서 서로 다른 모양으로 표현할 수 있어요.</span></output>}
-              </section>
+                <Button className="mt-5" variant="outline" onClick={() => update({ studioView: 'movement' })}><ArrowLeft />1. 캐릭터 움직이기로 돌아가기</Button>
+              </section>}
             </div>
           )}
 
