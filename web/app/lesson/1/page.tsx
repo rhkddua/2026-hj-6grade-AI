@@ -11,6 +11,9 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+} from '@/components/ui/dialog';
 import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress';
 import { loadLessonProgress, saveLessonProgress, type LessonProgress } from '@/lib/lesson-progress';
 import { useStudentSession } from '@/lib/student-auth';
@@ -64,9 +67,9 @@ const mathRounds = [
   {
     name: '기계어', icon: Cpu, accent: 'bg-stone-100 text-stone-700',
     prompt: '수업용 기계어로 3을 불러오고, 2를 더한 뒤 결과를 보여 주세요.',
-    hint: '0001은 숫자 불러오기, 0010은 더하기, 1111은 결과 보여 주기예요. 명령과 숫자를 한 줄씩 띄어 써요.',
+    hint: '앞 4자리는 할 일을 나타내는 명령어이고, 뒤 4자리는 계산에 사용할 숫자예요.',
     placeholder: '0001 0011\n0010 0010\n1111 0000',
-    guide: ['0001 0011  →  숫자 3 불러오기', '0010 0010  →  숫자 2 더하기', '1111 0000  →  결과 보여 주기'],
+    guide: ['명령 0001 = 불러오기', '명령 0010 = 더하기', '명령 1111 = 결과 보여주기', '숫자 3 = 0011', '숫자 2 = 0010'],
   },
   {
     name: '어셈블리어', icon: Terminal, accent: 'bg-blue-100 text-blue-700',
@@ -77,8 +80,8 @@ const mathRounds = [
   },
   {
     name: '고급 언어 · JavaScript', icon: Code2, accent: 'bg-violet-100 text-violet-700',
-    prompt: 'JavaScript 한 줄로 3 + 2의 결과를 화면에 보여 주세요.',
-    hint: 'console.log(계산식); 모양을 사용해요. 괄호 안에 3 + 2를 넣어 보세요.',
+    prompt: '사람이 읽기 쉬운 JavaScript로 같은 계산을 만들어 보세요.',
+    hint: 'console.log는 결과를 말해 주는 스피커예요. 두 빈칸에 3과 2를 넣어 스피커로 계산식을 보내 보세요.',
     placeholder: 'console.log(3 + 2);',
     guide: ['console.log(', '3 + 2', ');'],
   },
@@ -105,6 +108,15 @@ function assemblyInputStep(input: string) {
   if (lines[1] !== 'ADD A, #2') return 1;
   if (lines[2] !== 'OUT A') return 2;
   return 3;
+}
+
+function javascriptInputValues(input: string) {
+  const match = input.match(/^\s*console\.log\(\s*(\d*)\s*\+\s*(\d*)\s*\)\s*;?\s*$/i);
+  return [match?.[1] ?? '', match?.[2] ?? ''] as const;
+}
+
+function makeJavascriptInput(left: string, right: string) {
+  return `console.log(${left} + ${right});`;
 }
 
 const quizItems = [
@@ -217,12 +229,15 @@ export default function LessonOnePage() {
   const [saveError, setSaveError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [assemblyPlaybackStep, setAssemblyPlaybackStep] = useState<number | null>(null);
+  const [javascriptExecutionState, setJavascriptExecutionState] = useState<'idle' | 'executing' | 'done'>('idle');
+  const [javascriptLogs, setJavascriptLogs] = useState<string[]>([]);
   const userId = user?.id;
   const queue = useRef(Promise.resolve());
   const revision = useRef(0);
   const savedRevision = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const assemblyTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const javascriptTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
 
   const progress = completed ? 100 : (step - 1) * 20;
@@ -232,6 +247,10 @@ export default function LessonOnePage() {
   const mathComplete = activities.mathSolved.every(Boolean);
   const typedAssemblyStep = assemblyInputStep(activities.mathInputs[1]);
   const visibleAssemblyStep = assemblyPlaybackStep ?? typedAssemblyStep;
+  const [javascriptLeft, javascriptRight] = javascriptInputValues(activities.mathInputs[2]);
+  const visibleJavascriptLogs = javascriptLogs.length > 0
+    ? javascriptLogs
+    : activities.mathSolved[2] ? ['> 5'] : [];
   const requirements = [gameComplete, mathComplete, activities.quizChecked && quizScore === quizItems.length, reflection.trim().length >= 10];
   const snapshot: LessonProgress = useMemo(() => ({
     lessonNo: 1,
@@ -245,7 +264,10 @@ export default function LessonOnePage() {
 
   useEffect(() => { latest.current = snapshot; }, [snapshot]);
 
-  useEffect(() => () => { assemblyTimers.current.forEach((playbackTimer) => clearTimeout(playbackTimer)); }, []);
+  useEffect(() => () => {
+    assemblyTimers.current.forEach((playbackTimer) => clearTimeout(playbackTimer));
+    if (javascriptTimer.current) clearTimeout(javascriptTimer.current);
+  }, []);
 
   useEffect(() => {
     if (!userId) return;
@@ -341,7 +363,37 @@ export default function LessonOnePage() {
     update({ gameChecked: checked, gameSolved: solved });
   }
 
+  function changeMathInput(index: number, input: string) {
+    if (index === 1) {
+      assemblyTimers.current.forEach((playbackTimer) => clearTimeout(playbackTimer));
+      setAssemblyPlaybackStep(null);
+    }
+    if (index === 2) {
+      if (javascriptTimer.current) clearTimeout(javascriptTimer.current);
+      setJavascriptExecutionState('idle');
+    }
+    const inputs = activities.mathInputs.map((value, itemIndex) => itemIndex === index ? input : value);
+    const nextChecked = activities.mathChecked.map((value, itemIndex) => itemIndex === index ? false : value);
+    const nextSolved = activities.mathSolved.map((value, itemIndex) => itemIndex === index ? false : value);
+    update({ mathInputs: inputs, mathChecked: nextChecked, mathSolved: nextSolved });
+  }
+
   function runMathCommand(index: number) {
+    if (index === 2) {
+      if (!javascriptLeft || !javascriptRight) return;
+      if (javascriptTimer.current) clearTimeout(javascriptTimer.current);
+      setJavascriptExecutionState('executing');
+      const leftNumber = Number(javascriptLeft);
+      const rightNumber = Number(javascriptRight);
+      javascriptTimer.current = setTimeout(() => {
+        const checked = activities.mathChecked.map((value, itemIndex) => itemIndex === index ? true : value);
+        const solved = activities.mathSolved.map((value, itemIndex) => itemIndex === index ? isMathInputCorrect(index, activities.mathInputs[index]) : value);
+        update({ mathChecked: checked, mathSolved: solved });
+        setJavascriptLogs((logs) => [...logs, `> ${leftNumber + rightNumber}`].slice(-4));
+        setJavascriptExecutionState('done');
+      }, 500);
+      return;
+    }
     const checked = activities.mathChecked.map((value, itemIndex) => itemIndex === index ? true : value);
     const solved = activities.mathSolved.map((value, itemIndex) => itemIndex === index ? isMathInputCorrect(index, activities.mathInputs[index]) : value);
     update({ mathChecked: checked, mathSolved: solved });
@@ -483,13 +535,13 @@ export default function LessonOnePage() {
                     const checked = activities.mathChecked[index];
                     const solved = activities.mathSolved[index];
                     const isAssembly = index === 1;
+                    const isJavascript = index === 2;
                     return (
                       <article key={round.name} className="rounded-3xl border p-4 sm:p-6">
                         <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><span className={`grid size-10 place-items-center rounded-xl ${round.accent}`}><RoundIcon className="size-5" /></span><div><p className="text-xs font-bold text-muted-foreground">계산 미션 {index + 1} / 3</p><h4 className="text-lg font-black">{round.name}</h4></div></div>{solved && <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100"><CheckCircle2 />5 계산 완료</Badge>}</div>
                         <p className="mt-4 text-base font-bold leading-7">{round.prompt}</p>
-                        {isAssembly ? <div className="mt-3 flex gap-3 rounded-2xl bg-amber-50 p-4 text-amber-950"><Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" /><div className="min-w-0"><p className="text-sm font-bold leading-6">힌트: 어셈블리어는 컴퓨터 내부의 계산 방 <code className="rounded bg-white px-1.5 py-0.5">A</code>를 직접 사용해요!</p><ul className="mt-3 space-y-2 text-sm leading-6"><li><code className="font-bold">MOV A, #숫자</code>: 계산 방 A에 숫자를 넣어요. <span className="text-amber-800">#은 진짜 숫자라는 표시예요.</span></li><li><code className="font-bold">ADD A, #숫자</code>: 계산 방 A의 값에 숫자를 더해요.</li><li><code className="font-bold">OUT A</code>: 계산 방 A에 남은 결과를 화면에 보여 줘요.</li></ul></div></div> : <div className="mt-3 flex gap-3 rounded-2xl bg-amber-50 p-4 text-amber-950"><Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" /><div className="min-w-0"><p className="text-sm leading-6"><strong>힌트:</strong> {round.hint}</p><div className="mt-2 flex flex-wrap gap-2">{round.guide.map((item) => <code key={item} className="rounded-lg bg-white/80 px-2 py-1 text-xs sm:text-sm">{item}</code>)}</div></div></div>}
-                        <label htmlFor={`math-input-${index}`} className="mt-4 block text-sm font-black">명령을 직접 입력하세요.</label>
-                        <textarea id={`math-input-${index}`} value={activities.mathInputs[index]} onChange={(event) => { if (index === 1) { assemblyTimers.current.forEach((playbackTimer) => clearTimeout(playbackTimer)); setAssemblyPlaybackStep(null); } const inputs = activities.mathInputs.map((input, itemIndex) => itemIndex === index ? event.target.value : input); const nextChecked = activities.mathChecked.map((value, itemIndex) => itemIndex === index ? false : value); const nextSolved = activities.mathSolved.map((value, itemIndex) => itemIndex === index ? false : value); update({ mathInputs: inputs, mathChecked: nextChecked, mathSolved: nextSolved }); }} placeholder={round.placeholder} spellCheck={false} autoCapitalize="off" className="mt-2 min-h-24 w-full resize-y rounded-xl border bg-slate-950 p-3 font-mono text-base leading-7 text-teal-200 outline-none focus:border-primary focus:ring-3 focus:ring-primary/15" maxLength={120} />
+                        {isAssembly ? <div className="mt-3 flex gap-3 rounded-2xl bg-amber-50 p-4 text-amber-950"><Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" /><div className="min-w-0"><p className="text-sm font-bold leading-6">힌트: 어셈블리어는 컴퓨터 내부의 계산 방 <code className="rounded bg-white px-1.5 py-0.5">A</code>를 직접 사용해요!</p><ul className="mt-3 space-y-2 text-sm leading-6"><li><code className="font-bold">MOV A, #숫자</code>: 계산 방 A에 숫자를 넣어요. <span className="text-amber-800">#은 진짜 숫자라는 표시예요.</span></li><li><code className="font-bold">ADD A, #숫자</code>: 계산 방 A의 값에 숫자를 더해요.</li><li><code className="font-bold">OUT A</code>: 계산 방 A에 남은 결과를 화면에 보여 줘요.</li></ul></div></div> : isJavascript ? <div className="mt-3 rounded-2xl border border-violet-200 bg-violet-50 p-4 text-violet-950"><div className="flex gap-3"><MessageSquareText className="mt-0.5 size-5 shrink-0 text-violet-600" /><div className="min-w-0"><p className="text-sm font-bold leading-6"><code className="rounded bg-white px-1.5 py-0.5">console.log</code>는 결과를 말해 주는 <strong>스피커</strong>예요.</p><p className="mt-1 text-sm leading-6">스피커에 <code className="font-bold">3 + 2</code>라는 계산식을 보내면 화면에 결과가 나타나요!</p></div></div><Dialog><DialogTrigger render={<Button type="button" variant="outline" size="sm" className="mt-3 bg-white" />}><History />앞의 언어와 비교하기</DialogTrigger><DialogContent><DialogHeader><DialogTitle>같은 3 + 2, 언어마다 어떻게 다를까요?</DialogTitle><DialogDescription>컴퓨터에 가까운 표현에서 사람이 읽기 쉬운 표현으로 비교해 보세요.</DialogDescription></DialogHeader><div className="grid gap-3"><div className="rounded-2xl border bg-stone-50 p-4"><p className="font-black text-stone-700">기계어</p><code className="mt-2 block break-all text-xs">0001 0011 · 0010 0010 · 1111 0000</code><p className="mt-2 text-sm text-muted-foreground">0과 1의 약속을 알아야 뜻을 읽을 수 있어요.</p></div><div className="rounded-2xl border bg-blue-50 p-4"><p className="font-black text-blue-800">어셈블리어</p><code className="mt-2 block text-xs">MOV A, #3 · ADD A, #2 · OUT A</code><p className="mt-2 text-sm text-muted-foreground">짧은 영어 명령이지만 계산 방 A를 직접 다뤄요.</p></div><div className="rounded-2xl border border-violet-300 bg-violet-50 p-4"><p className="font-black text-violet-800">JavaScript</p><code className="mt-2 block text-sm">console.log(3 + 2);</code><p className="mt-2 text-sm font-bold text-violet-900">계산식이 그대로 보여 사람이 읽고 바꾸기 쉬워요.</p></div></div></DialogContent></Dialog></div> : <div className="mt-3 flex gap-3 rounded-2xl bg-amber-50 p-4 text-amber-950"><Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" /><div className="min-w-0"><p className="text-sm leading-6"><strong>힌트:</strong> {round.hint}</p><div className="mt-2 flex flex-wrap gap-2">{round.guide.map((item) => <code key={item} className="rounded-lg bg-white/80 px-2 py-1 text-xs sm:text-sm">{item}</code>)}</div></div></div>}
+                        {!isJavascript && <><label htmlFor={`math-input-${index}`} className="mt-4 block text-sm font-black">명령을 직접 입력하세요.</label><textarea id={`math-input-${index}`} value={activities.mathInputs[index]} onChange={(event) => changeMathInput(index, event.target.value)} placeholder={round.placeholder} spellCheck={false} autoCapitalize="off" className="mt-2 min-h-24 w-full resize-y rounded-xl border bg-slate-950 p-3 font-mono text-base leading-7 text-teal-200 outline-none focus:border-primary focus:ring-3 focus:ring-primary/15" maxLength={120} /></>}
                         {isAssembly && <div className="mt-4 overflow-hidden rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-4 sm:p-5" aria-label="어셈블리어 실행 모습" aria-live="polite">
                           <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-xs font-bold text-blue-700">컴퓨터 내부 들여다보기</p><p className="mt-1 font-black text-blue-950">명령에 따라 계산 방 A가 변해요</p></div><Badge variant="outline" className="bg-white">실행 {visibleAssemblyStep} / 3</Badge></div>
                           <ol className="mt-4 grid gap-2 sm:grid-cols-3">{['MOV A, #3', 'ADD A, #2', 'OUT A'].map((command, commandIndex) => <li key={command} className={`rounded-xl border px-3 py-2 text-center font-mono text-xs font-bold transition-all duration-500 ${visibleAssemblyStep > commandIndex ? 'border-blue-500 bg-blue-600 text-white shadow-sm' : 'border-blue-200 bg-white text-blue-900'}`}>{visibleAssemblyStep > commandIndex ? '✓ ' : `${commandIndex + 1}. `}{command}</li>)}</ol>
@@ -500,8 +552,16 @@ export default function LessonOnePage() {
                           </div>
                           <p className="mt-3 text-center text-sm font-bold text-blue-950">{visibleAssemblyStep === 0 ? '첫 줄을 입력하면 A가 준비돼요.' : visibleAssemblyStep === 1 ? 'MOV 실행: 계산 방 A에 3이 들어갔어요.' : visibleAssemblyStep === 2 ? 'ADD 실행: A의 3에 2를 더해 5가 되었어요.' : 'OUT 실행: 계산 결과 5가 화면에 나타났어요!'}</p>
                         </div>}
-                        <Button className="mt-3" disabled={!activities.mathInputs[index].trim()} onClick={() => runMathCommand(index)}><Calculator />계산하기</Button>
-                        {checked && <output aria-live="polite" className={`mt-3 block rounded-2xl p-4 text-sm font-bold leading-6 ${solved ? 'bg-emerald-50 text-emerald-800' : 'bg-orange-50 text-orange-800'}`}>{solved ? `정확해요! ${round.name} 명령으로 3 + 2 = 5를 계산했어요.` : `아직 결과가 나오지 않았어요. 힌트의 명령을 순서와 기호까지 살펴보고 다시 입력해 보세요.`}</output>}
+                        {isJavascript && <div className="mt-4 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950 shadow-lg">
+                          <div className="flex items-center gap-2 border-b border-slate-700 bg-slate-900 px-4 py-3"><span className="size-3 rounded-full bg-red-400" aria-hidden="true" /><span className="size-3 rounded-full bg-amber-300" aria-hidden="true" /><span className="size-3 rounded-full bg-emerald-400" aria-hidden="true" /><span className="ml-2 text-xs font-bold text-slate-300">JavaScript Console</span></div>
+                          <div className="p-4 sm:p-5">
+                            <label className="text-sm font-black text-white" htmlFor="javascript-left-number">빈칸을 채워 코드를 완성하세요.</label>
+                            <div className="mt-3 flex flex-wrap items-center gap-2 font-mono text-base text-violet-200 sm:text-lg"><span>console.log(</span><input id="javascript-left-number" aria-label="첫 번째 숫자" inputMode="numeric" pattern="[0-9]*" maxLength={3} value={javascriptLeft} onChange={(event) => changeMathInput(2, makeJavascriptInput(event.target.value.replace(/\D/g, ''), javascriptRight))} className="w-16 rounded-lg border-2 border-violet-400 bg-slate-800 px-2 py-1.5 text-center font-black text-white outline-none focus:ring-3 focus:ring-violet-400/30" /><span>+</span><input aria-label="두 번째 숫자" inputMode="numeric" pattern="[0-9]*" maxLength={3} value={javascriptRight} onChange={(event) => changeMathInput(2, makeJavascriptInput(javascriptLeft, event.target.value.replace(/\D/g, '')))} className="w-16 rounded-lg border-2 border-violet-400 bg-slate-800 px-2 py-1.5 text-center font-black text-white outline-none focus:ring-3 focus:ring-violet-400/30" /><span>);</span></div>
+                            <div className="mt-4 min-h-24 rounded-xl border border-slate-700 bg-black/40 p-3 font-mono text-sm" aria-label="JavaScript 실행 결과" aria-live="polite">{javascriptExecutionState === 'executing' ? <span className="flex items-center gap-2 text-amber-300"><LoaderCircle className="size-4 animate-spin" />Executing...</span> : visibleJavascriptLogs.length > 0 ? <ol className="space-y-1 text-emerald-300">{visibleJavascriptLogs.map((log, logIndex) => <li key={`${log}-${logIndex}`}>{log}</li>)}</ol> : <span className="text-slate-500">&gt; 실행 결과가 여기에 쌓여요.</span>}</div>
+                          </div>
+                        </div>}
+                        <Button className="mt-3" disabled={isJavascript ? !javascriptLeft || !javascriptRight || javascriptExecutionState === 'executing' : !activities.mathInputs[index].trim()} onClick={() => runMathCommand(index)}>{isJavascript && javascriptExecutionState === 'executing' ? <LoaderCircle className="animate-spin" /> : <Calculator />}{isJavascript ? javascriptExecutionState === 'executing' ? '실행 중…' : '코드 실행하기' : '계산하기'}</Button>
+                        {checked && <output aria-live="polite" className={`mt-3 block rounded-2xl p-4 text-sm font-bold leading-6 ${solved ? 'bg-emerald-50 text-emerald-800' : 'bg-orange-50 text-orange-800'}`}>{solved ? `정확해요! ${round.name} 명령으로 3 + 2 = 5를 계산했어요.` : isJavascript ? '코드는 실행되었어요! 이번 미션의 두 빈칸에는 3과 2를 넣어 보세요.' : '아직 결과가 나오지 않았어요. 힌트의 명령을 순서와 기호까지 살펴보고 다시 입력해 보세요.'}</output>}
                       </article>
                     );
                   })}
