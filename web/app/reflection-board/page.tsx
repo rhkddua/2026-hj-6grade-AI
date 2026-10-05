@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   ArrowLeft,
   BookOpen,
@@ -12,7 +11,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   lessonTitles,
   loadReflectionBoard,
@@ -141,10 +140,11 @@ export default function ReflectionBoardPage() {
     <div className="min-h-screen bg-muted/30 text-foreground">
       <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto flex min-h-18 max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <Button render={<Link href="/" />} variant="ghost">
+          {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+          <a href="/" className={buttonVariants({ variant: 'ghost' })}>
             <ArrowLeft />
             수업 홈
-          </Button>
+          </a>
           <div className="hidden items-center gap-2 text-sm font-bold text-teal-800 sm:flex">
             <ShieldCheck className="size-4" />
             이름과 학번을 표시하지 않아요

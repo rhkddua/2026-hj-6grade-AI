@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+
 import {
   ArrowRight,
   BookOpen,
@@ -114,10 +114,12 @@ export default function HomePage() {
               <BookOpen className="size-4.5" />
               전체 차시
             </a>
-            <Link className="nav-item" href="/reflection-board">
+            {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+            <a className="nav-item" href="/reflection-board">
               <MessageSquareText className="size-4.5" />한 문장 게시판
-            </Link>
-            <a className="nav-item" href="#works">
+            </a>
+            {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+<a className="nav-item" href="/my-apps">
               <Rocket className="size-4.5" />
               나의 앱
             </a>
@@ -181,13 +183,14 @@ export default function HomePage() {
                 AI 코딩의 변화를 알아봅니다.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link
+                {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+                <a
                   href="/lesson/1"
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-extrabold text-teal-900 transition-colors hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/50"
                 >
                   수업 시작하기
                   <ArrowRight className="size-4.5" />
-                </Link>
+                </a>
                 <div className="flex items-center gap-2 px-2 text-sm font-semibold text-teal-50">
                   <span className="inline-block size-2 rounded-full bg-orange-300" />
                   약 40분
@@ -217,7 +220,8 @@ export default function HomePage() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {lessons.map((lesson) => (
-                <Link
+                /* oxlint-disable-next-line next/no-html-link-for-pages */
+                <a
                   href={`/lesson/${lesson.no}`}
                   key={lesson.no}
                   className={`lesson-card lesson-${lesson.status}`}
@@ -246,13 +250,15 @@ export default function HomePage() {
                     {lesson.status === 'open' && '곧 이어서 학습해요'}
                     {lesson.status === 'locked' && '아직 열리지 않았어요'}
                   </p>
-                </Link>
+                </a>
               ))}
             </div>
           </section>
 
           <section className="mt-8 grid gap-4 md:grid-cols-3" id="works">
-            <Link
+            {/* Use native navigation here; the client router click was not navigating for student sessions. */}
+            {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+            <a
               href="/reflection-board"
               aria-label="한 문장 배움 게시판 열기"
               className="rounded-3xl border bg-card p-5 shadow-sm transition-colors hover:border-primary/40 hover:bg-secondary/30 sm:p-6"
@@ -270,8 +276,9 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-            </Link>
-            <article className="rounded-3xl border bg-card p-5 shadow-sm sm:p-6">
+            </a>
+            {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+<a href="/my-apps" aria-label="나의 앱 보관함 열기" className="rounded-3xl border bg-card p-5 shadow-sm transition-colors hover:border-primary/40 hover:bg-secondary/30 sm:p-6">
               <div className="flex items-start gap-4">
                 <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-700">
                   <Rocket className="size-5" />
@@ -281,11 +288,11 @@ export default function HomePage() {
                     나의 앱 보관함
                   </h2>
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                    아직 제출한 앱이 없어요. 5차시부터 하나씩 채워 볼까요?
+                    만든 앱의 공유 링크를 저장하고 다시 열어 보세요.
                   </p>
                 </div>
               </div>
-            </article>
+            </a>
             <article
               className="rounded-3xl border bg-card p-5 shadow-sm sm:p-6"
               id="feedback"
@@ -320,11 +327,13 @@ export default function HomePage() {
           <BookOpen className="size-5" />
           <span>차시</span>
         </a>
-        <Link className="mobile-nav-item" href="/reflection-board">
+        {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+        <a className="mobile-nav-item" href="/reflection-board">
           <MessageSquareText className="size-5" />
           <span>게시판</span>
-        </Link>
-        <a className="mobile-nav-item" href="#works">
+        </a>
+        {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+<a className="mobile-nav-item" href="/my-apps">
           <Rocket className="size-5" />
           <span>나의 앱</span>
         </a>
