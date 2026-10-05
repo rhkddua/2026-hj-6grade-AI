@@ -25,6 +25,7 @@ import {
   ProgressValue,
 } from '@/components/ui/progress';
 import { signOutStudent, useStudentSession } from '@/lib/student-auth';
+import { useStudentBadge } from '@/lib/use-student-badge';
 
 const lessons = [
   { no: 1, title: '코딩은 어떻게 발전했을까?', status: 'current' },
@@ -40,7 +41,8 @@ const lessons = [
 ];
 
 export default function HomePage() {
-  const { profile, loading } = useStudentSession();
+  const { user, profile, loading } = useStudentSession();
+  const badge = useStudentBadge(user?.id);
 
   if (loading)
     return (
@@ -123,9 +125,10 @@ export default function HomePage() {
               <Rocket className="size-4.5" />
               나의 앱
             </a>
-            <a className="nav-item" href="#feedback">
-              <MessageSquareText className="size-4.5" />
-              받은 피드백
+            {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+            <a className="nav-item" href="/badges">
+              <Trophy className="size-4.5" />
+              이번 주 배지
             </a>
           </nav>
           <div className="mt-8 rounded-2xl border border-amber-200/80 bg-amber-50 p-4 text-amber-950">
@@ -293,9 +296,11 @@ export default function HomePage() {
                 </div>
               </div>
             </a>
-            <article
-              className="rounded-3xl border bg-card p-5 shadow-sm sm:p-6"
-              id="feedback"
+            {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+            <a
+              href="/badges"
+              aria-label="이번 주 배지 보기"
+              className="rounded-3xl border bg-card p-5 shadow-sm transition-colors hover:border-primary/40 hover:bg-secondary/30 sm:p-6"
             >
               <div className="flex items-start gap-4">
                 <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-orange-100 text-orange-700">
@@ -306,12 +311,11 @@ export default function HomePage() {
                     이번 주 배지
                   </h2>
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                    1차시의 퀴즈와 한 문장 정리를 마치면 ‘첫걸음 탐험가’ 배지를
-                    받을 수 있어요.
+                    {badge.loading ? '배지 기록을 불러오는 중…' : badge.error ? '기록을 확인하지 못했어요. 눌러서 다시 확인해 주세요.' : badge.earned ? '‘첫걸음 탐험가’ 획득 완료! 나의 배지를 확인해 보세요.' : '‘첫걸음 탐험가’에 도전해요. 눌러서 남은 조건을 확인하세요.'}
                   </p>
                 </div>
               </div>
-            </article>
+            </a>
           </section>
         </main>
       </div>
