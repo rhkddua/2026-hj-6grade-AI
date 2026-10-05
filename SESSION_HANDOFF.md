@@ -1,16 +1,18 @@
 # AI 코딩 교실 — 현재 작업 인수인계
 
 > 최종 갱신: 2026-10-05 (KST)
-> 다음 단계: **관리자 개선 version 38 배포 완료 — CSV 실제 다운로드는 일반 브라우저에서 추가 확인**
+> 다음 단계: **담임교사 7개 계정의 반별 관리자 권한 구현 — 검토 완료, 권한 부여 미실행**
 
 ## 1. 다음 세션의 최소 컨텍스트
 
-다음 관리자 검증 세션에서는 아래 파일을 읽는다.
+다음 담임교사 권한 구현 세션에서는 아래 파일을 읽는다.
 
 1. `web/AGENTS.md`
 2. 이 문서
-3. `ADMIN_E2E_PLAN.md`
-4. `ADMIN_E2E_RESULTS.md`
+3. `TEACHER_CLASS_ACCESS_HANDOFF.md`
+4. `NEXT_SESSION_PROMPT.md`
+
+`hj601@admin.com` ~ `hj607@admin.com` Auth 계정 7개 생성은 확인했다. 비밀번호는 사용자가 직접 설정했다. 전체 반 최고관리자 부여 SQL은 실행하지 않았으며 사용자가 반별 제한으로 요구를 변경했다. `scripts/grant_teacher_admins_20261005.sql`은 폐기된 안이므로 실행하지 않는다. 기존 최고관리자는 전체 반, 새 teacher 계정은 각각 6학년 1~7반으로 제한한다. DB/RLS/RPC/로그인 구현·적용·배포는 다음 세션 작업이다.
 
 `PRD.md`, `README.md`, `LESSON_2_STATUS.md`, 과거 Git 이력은 현재 요청을 이해하는 데 필요할 때만 읽는다. 학생 과정 전체 E2E의 계획과 미실시 항목은 `LESSON_E2E_PLAN.md`, `LESSON_E2E_RESULTS.md`에 별도로 남아 있다.
 
