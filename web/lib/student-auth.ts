@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 
 import { supabase } from '@/lib/supabase';
+import { loadStaffAccess } from '@/lib/staff-access';
 
 export type StudentProfile = {
   user_id: string;
@@ -39,12 +40,7 @@ export function useStudentSession() {
         .maybeSingle();
       if (!active) return;
       if (!data) {
-        const { data: staff } = await supabase!
-          .from('staff_profiles')
-          .select('role')
-          .eq('user_id', nextUser.id)
-          .eq('role', 'super_admin')
-          .maybeSingle<{ role: string }>();
+        const staff = await loadStaffAccess().catch(() => null);
         if (!active) return;
         if (staff) {
           window.location.replace('/admin');

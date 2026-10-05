@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { koreanAuthError } from '@/lib/auth-errors';
 import { supabase } from '@/lib/supabase';
+import { loadStaffAccess } from '@/lib/staff-access';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -42,12 +43,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      const { data: staff } = await supabase
-        .from('staff_profiles')
-        .select('role')
-        .eq('user_id', data.user.id)
-        .eq('role', 'super_admin')
-        .maybeSingle<{ role: string }>();
+      const staff = await loadStaffAccess().catch(() => null);
 
       if (!active) return;
       if (staff) window.location.replace('/admin');
@@ -68,7 +64,7 @@ export default function AdminLoginPage() {
 
     setBusy(true);
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
@@ -77,16 +73,11 @@ export default function AdminLoginPage() {
         return;
       }
 
-      const { data: staff, error: roleError } = await supabase
-        .from('staff_profiles')
-        .select('role')
-        .eq('user_id', data.user.id)
-        .eq('role', 'super_admin')
-        .maybeSingle<{ role: string }>();
+      const staff = await loadStaffAccess();
 
-      if (roleError || !staff) {
+      if (!staff) {
         await supabase.auth.signOut();
-        setError('최고관리자 권한이 없는 계정입니다. 학생은 학생 로그인을 이용해 주세요.');
+        setError('관리자 권한 또는 담당 학급 배정이 없는 계정입니다. 학생은 학생 로그인을 이용해 주세요.');
         return;
       }
 
@@ -107,10 +98,10 @@ export default function AdminLoginPage() {
             <div className="grid size-12 place-items-center rounded-2xl bg-white/10"><ShieldCheck className="size-6" /></div>
             <p className="mt-8 text-sm font-bold text-teal-200">ADMIN CONSOLE</p>
             <h1 className="mt-2 font-heading text-4xl font-black leading-tight">수업 현황을 한눈에<br />확인하고 관리해요.</h1>
-            <p className="mt-4 max-w-sm leading-7 text-slate-300">학생 계정과 분리된 최고관리자 전용 입구입니다. 권한이 확인된 계정만 관리 화면에 접근할 수 있습니다.</p>
+            <p className="mt-4 max-w-sm leading-7 text-slate-300">최고관리자와 담임교사 전용 입구입니다. 권한이 확인된 계정만 관리 화면에 접근할 수 있습니다.</p>
           </div>
           <div className="relative space-y-3 text-sm font-bold text-slate-200">
-            <p className="flex items-center gap-2"><ShieldCheck className="size-4 text-teal-300" />최고관리자 역할 확인</p>
+            <p className="flex items-center gap-2"><ShieldCheck className="size-4 text-teal-300" />관리자 역할과 담당 학급 확인</p>
             <p className="flex items-center gap-2"><ShieldCheck className="size-4 text-teal-300" />학생별 학습 현황 조회</p>
             <p className="flex items-center gap-2"><ShieldCheck className="size-4 text-teal-300" />RLS 기반 데이터 보호</p>
           </div>
@@ -120,16 +111,16 @@ export default function AdminLoginPage() {
           <button type="button" onClick={switchToStudentLogin} disabled={switchingMode} className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-teal-800 disabled:cursor-wait disabled:opacity-60"><ArrowLeft className="size-4" />{switchingMode ? '학생 로그인으로 이동 중' : '학생 로그인으로 돌아가기'}</button>
           <div className="mt-8 flex items-center gap-3">
             <div className="grid size-10 place-items-center rounded-2xl bg-slate-950 text-white"><Code2 className="size-5" /></div>
-            <div><p className="font-heading text-lg font-black">AI 코딩 교실</p><p className="text-xs text-slate-500">최고관리자</p></div>
+            <div><p className="font-heading text-lg font-black">AI 코딩 교실</p><p className="text-xs text-slate-500">최고관리자 · 담임교사</p></div>
           </div>
           <div className="mt-8">
             <p className="text-sm font-bold text-teal-700">관리자 전용</p>
             <h2 className="mt-1 font-heading text-3xl font-black tracking-tight">관리자 계정으로 로그인</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">등록된 최고관리자 이메일과 비밀번호를 입력하세요.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">등록된 최고관리자 또는 담임교사 이메일과 비밀번호를 입력하세요.</p>
           </div>
           <div className="mt-6 flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
             <KeyRound className="mt-0.5 size-5 shrink-0 text-teal-700" />
-            <p><strong>학생 계정과 관리자 계정은 권한이 다릅니다.</strong><br />로그인 뒤 최고관리자 역할을 한 번 더 확인합니다.</p>
+            <p><strong>학생 계정과 관리자 계정은 권한이 다릅니다.</strong><br />담임교사는 배정된 학급의 기록만 조회·관리합니다.</p>
           </div>
 
           <form className="mt-7 space-y-4" onSubmit={submit}>

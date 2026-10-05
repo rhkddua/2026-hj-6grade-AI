@@ -4,12 +4,8 @@ import { useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 
 import { supabase } from '@/lib/supabase';
-
-export type AdminProfile = {
-  user_id: string;
-  display_name: string;
-  role: 'super_admin';
-};
+import { loadStaffAccess, type AdminProfile } from '@/lib/staff-access';
+export type { AdminProfile } from '@/lib/staff-access';
 
 export function useAdminSession() {
   const [user, setUser] = useState<User | null>(null);
@@ -27,17 +23,13 @@ export function useAdminSession() {
         return;
       }
 
-      const { data, error: profileError } = await supabase
-        .from('staff_profiles')
-        .select('user_id,display_name,role')
-        .eq('user_id', nextUser.id)
-        .eq('role', 'super_admin')
-        .maybeSingle<AdminProfile>();
+      let data: AdminProfile | null = null;
+      try { data = await loadStaffAccess(); } catch { /* Fail closed. */ }
 
       if (!active) return;
-      if (profileError || !data) {
+      if (!data) {
         await supabase.auth.signOut();
-        setError('최고관리자 권한을 확인할 수 없습니다. 계정 역할을 확인해 주세요.');
+        setError('관리자 권한을 확인할 수 없습니다. 교사는 담당 학급 배정을 확인해 주세요.');
         setLoading(false);
         window.location.replace('/admin/login?reason=unauthorized');
         return;

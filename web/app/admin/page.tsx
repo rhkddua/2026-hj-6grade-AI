@@ -88,6 +88,7 @@ function downloadCsv(students: AdminStudent[]) {
 
 export default function AdminPage() {
   const { profile, loading: authLoading, error: authError } = useAdminSession();
+  const scopeLabel = profile?.role === 'teacher' ? `${profile.grade}학년 ${profile.class_no}반` : '전체 학급';
   const [students, setStudents] = useState<AdminStudent[]>([]);
   const [progress, setProgress] = useState<AdminProgress[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,8 +173,8 @@ export default function AdminPage() {
     <div className="min-h-screen bg-slate-100 text-slate-950">
       <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950 text-white">
         <div className="mx-auto flex h-18 max-w-[1600px] items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3"><div className="grid size-10 place-items-center rounded-2xl bg-teal-600"><ShieldCheck className="size-5" /></div><div><p className="font-heading text-lg font-black">AI 코딩 교실</p><p className="text-xs text-slate-400">최고관리자 콘솔</p></div></div>
-          <div className="flex items-center gap-3"><div className="hidden text-right sm:block"><p className="text-sm font-bold">{profile?.display_name}</p><p className="text-xs text-teal-300">Super Admin</p></div><Button variant="ghost" size="icon-lg" className="text-slate-300 hover:bg-slate-800 hover:text-white" aria-label="관리자 로그아웃" onClick={() => void signOutAdmin()}><LogOut className="size-5" /></Button></div>
+          <div className="flex items-center gap-3"><div className="grid size-10 place-items-center rounded-2xl bg-teal-600"><ShieldCheck className="size-5" /></div><div><p className="font-heading text-lg font-black">AI 코딩 교실</p><p className="text-xs text-slate-400">{profile?.role === 'teacher' ? '담임교사 콘솔' : '최고관리자 콘솔'}</p></div></div>
+          <div className="flex items-center gap-3"><div className="hidden text-right sm:block"><p className="text-sm font-bold">{profile?.display_name}</p><p className="text-xs text-teal-300">{scopeLabel}</p></div><Button variant="ghost" size="icon-lg" className="text-slate-300 hover:bg-slate-800 hover:text-white" aria-label="관리자 로그아웃" onClick={() => void signOutAdmin()}><LogOut className="size-5" /></Button></div>
         </div>
       </header>
 
@@ -192,12 +193,12 @@ export default function AdminPage() {
               return <button key={item.id} type="button" aria-current={isActive ? 'page' : undefined} onClick={() => openView(item.id)} className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-bold transition-colors ${isActive ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100'}`}><item.icon className="size-4.5" />{item.label}</button>;
             })}
           </nav>
-          <div className="mt-8 rounded-2xl border border-teal-200 bg-teal-50 p-4"><p className="flex items-center gap-2 text-sm font-black text-teal-950"><ShieldCheck className="size-4" />보호된 관리자 영역</p><p className="mt-2 text-sm leading-6 text-teal-900/75">학생 데이터는 최고관리자 권한과 데이터베이스 정책을 모두 통과해야 표시됩니다.</p></div>
+          <div className="mt-8 rounded-2xl border border-teal-200 bg-teal-50 p-4"><p className="flex items-center gap-2 text-sm font-black text-teal-950"><ShieldCheck className="size-4" />보호된 관리자 영역</p><p className="mt-2 text-sm leading-6 text-teal-900/75">학생 데이터는 담당 학급 권한과 데이터베이스 정책을 모두 통과해야 표시됩니다.</p></div>
         </aside>
 
         <main id={activeView} className="min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <section className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-            <div><p className="text-sm font-bold text-teal-700">{activeViewCopy.eyebrow}</p><h1 className="mt-1 font-heading text-3xl font-black tracking-[-0.04em] sm:text-4xl">{activeViewCopy.title}</h1><p className="mt-2 text-base text-slate-600">{activeViewCopy.description}</p></div>
+            <div><p className="text-sm font-bold text-teal-700">{activeViewCopy.eyebrow}</p><h1 className="mt-1 font-heading text-3xl font-black tracking-[-0.04em] sm:text-4xl">{activeViewCopy.title}</h1><p className="mt-2 text-base text-slate-600">{activeViewCopy.description}</p><output className="mt-2 block text-sm font-bold text-teal-700">조회·관리 범위: {scopeLabel}</output></div>
             {activeView !== 'board' && <div className="flex flex-wrap gap-2">{(activeView === 'dashboard' || activeView === 'students') && <Button variant="outline" onClick={() => downloadCsv(filteredStudents)} disabled={loading || !!error || filteredStudents.length === 0}><Download data-icon="inline-start" />CSV 내려받기</Button>}<Button onClick={() => void refresh()} disabled={loading} className="bg-slate-950 text-white hover:bg-slate-800"><RefreshCw className={loading ? 'animate-spin' : ''} data-icon="inline-start" />새로고침</Button></div>}
           </section>
 
@@ -219,7 +220,7 @@ export default function AdminPage() {
 
           {activeView === 'students' && <section className="mt-7 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-200 p-5 sm:p-6">
-              <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-end"><div><h2 className="font-heading text-xl font-black">학생별 학습 현황</h2><p className="mt-1 text-sm text-slate-500">최근 저장 기록을 기준으로 표시합니다.</p></div><div className="grid gap-2 sm:grid-cols-[minmax(220px,1fr)_140px_160px]"><div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="이름 또는 번호 검색" className="pl-10" aria-label="학생 검색" /></div><select value={classFilter} onChange={(event) => setClassFilter(event.target.value)} className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm font-bold" aria-label="학급 선택"><option value="all">전체 학급</option>{classOptions.map((classNo) => <option key={classNo} value={classNo}>{classNo}반</option>)}</select><select value={lessonFilter} onChange={(event) => setLessonFilter(event.target.value)} className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm font-bold" aria-label="차시 선택"><option value="all">전체 차시</option>{Array.from({ length: ACTIVE_LESSONS }, (_, index) => index + 1).map((lessonNo) => <option key={lessonNo} value={lessonNo}>{lessonNo}차시 기록 있음</option>)}</select></div></div>
+              <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-end"><div><h2 className="font-heading text-xl font-black">학생별 학습 현황</h2><p className="mt-1 text-sm text-slate-500">최근 저장 기록을 기준으로 표시합니다.</p></div><div className="grid gap-2 sm:grid-cols-[minmax(220px,1fr)_140px_160px]"><div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="이름 또는 번호 검색" className="pl-10" aria-label="학생 검색" /></div><select value={classFilter} onChange={(event) => setClassFilter(event.target.value)} className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm font-bold" aria-label="학급 선택"><option value="all">{scopeLabel}</option>{classOptions.map((classNo) => <option key={classNo} value={classNo}>{classNo}반</option>)}</select><select value={lessonFilter} onChange={(event) => setLessonFilter(event.target.value)} className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm font-bold" aria-label="차시 선택"><option value="all">전체 차시</option>{Array.from({ length: ACTIVE_LESSONS }, (_, index) => index + 1).map((lessonNo) => <option key={lessonNo} value={lessonNo}>{lessonNo}차시 기록 있음</option>)}</select></div></div>
             </div>
 
             {error && <div role="alert" className="m-5 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</div>}

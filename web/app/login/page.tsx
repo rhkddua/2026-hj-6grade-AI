@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { koreanAuthError } from '@/lib/auth-errors';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { loadStaffAccess } from '@/lib/staff-access';
 
 export default function StudentLoginPage() {
   const [email, setEmail] = useState('');
@@ -42,15 +43,7 @@ export default function StudentLoginPage() {
       if (authError) {
         setError(koreanAuthError(authError.message, authError.code));
       } else {
-        const { data: userData } = await supabase.auth.getUser();
-        const { data: staff } = userData.user
-          ? await supabase
-              .from('staff_profiles')
-              .select('role')
-              .eq('user_id', userData.user.id)
-              .eq('role', 'super_admin')
-              .maybeSingle<{ role: string }>()
-          : { data: null };
+        const staff = await loadStaffAccess();
         window.location.replace(staff ? '/admin' : '/');
       }
     } catch {
