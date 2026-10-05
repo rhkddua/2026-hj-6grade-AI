@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   AlertTriangle, BarChart3, BookOpenCheck, CheckCircle2, ChevronRight,
   Download, LayoutDashboard, LoaderCircle, LogOut, RefreshCw,
-  Search, ShieldCheck, TrendingUp, UserRound, Users,
+  Search, ShieldCheck, TrendingUp, UserRound, Users, MessageSquareQuote,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -14,15 +14,18 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { signOutAdmin, useAdminSession } from '@/lib/admin-auth';
 import { AdminProgress, AdminStudent, loadAdminDashboard } from '@/lib/admin-dashboard';
+import { AdminReflectionBoard } from '@/components/admin-reflection-board';
+import { createCsv } from '@/lib/safe-csv';
 
 const ACTIVE_LESSONS = 10;
 
-type AdminView = 'dashboard' | 'students' | 'lessons';
+type AdminView = 'dashboard' | 'students' | 'lessons' | 'board';
 
 const ADMIN_VIEWS = [
   { id: 'dashboard' as const, label: '대시보드', icon: LayoutDashboard },
   { id: 'students' as const, label: '학생 현황', icon: Users },
   { id: 'lessons' as const, label: '차시별 진도', icon: BookOpenCheck },
+  { id: 'board' as const, label: '게시판 관리', icon: MessageSquareQuote },
 ];
 
 const ADMIN_VIEW_COPY: Record<AdminView, { eyebrow: string; title: string; description: string }> = {
@@ -41,6 +44,11 @@ const ADMIN_VIEW_COPY: Record<AdminView, { eyebrow: string; title: string; descr
     title: '차시별 진도',
     description: `1~${ACTIVE_LESSONS}차시의 완료 인원과 전체 완료율을 확인합니다.`,
   },
+  board: {
+    eyebrow: '게시글 관리',
+    title: '게시판 관리',
+    description: '게시글과 작성 계정을 확인하고 공개 또는 숨김 상태를 관리합니다.',
+  },
 };
 
 function formatDate(value: string | null) {
@@ -54,7 +62,7 @@ function formatDate(value: string | null) {
 }
 
 function downloadCsv(students: AdminStudent[]) {
-  const header = ['학년', '반', '번호', '이름', '시작 차시', '완료 차시', '평균 퀴즈', '최근 차시', '최근 활동'];
+  const header = ['학년', '반', '번호', '이름', '시작 차시', '완료 차시', '평균 퀴즈', '최근 저장 차시', '최근 활동'];
   const rows = students.map((student) => [
     student.grade,
     student.classNo,
@@ -66,15 +74,16 @@ function downloadCsv(students: AdminStudent[]) {
     student.latestLesson ?? '',
     student.latestUpdatedAt ?? '',
   ]);
-  const csv = [header, ...rows]
-    .map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(','))
-    .join('\r\n');
-  const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }));
+  const csv = createCsv([header, ...rows]);
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = `ai-coding-students-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(anchor);
   anchor.click();
-  URL.revokeObjectURL(url);
+  anchor.remove();
+  // Let the browser start consuming the Blob before revoking its URL.
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 export default function AdminPage() {
@@ -92,7 +101,7 @@ export default function AdminPage() {
   useEffect(() => {
     function syncViewFromHash() {
       const hash = window.location.hash.slice(1);
-      setActiveView(hash === 'students' || hash === 'lessons' ? hash : 'dashboard');
+      setActiveView(hash === 'students' || hash === 'lessons' || hash === 'board' ? hash : 'dashboard');
     }
 
     syncViewFromHash();
@@ -108,6 +117,8 @@ export default function AdminPage() {
       setStudents(data.students);
       setProgress(data.progress);
     } catch {
+      setStudents([]);
+      setProgress([]);
       setError('학생 현황을 불러오지 못했습니다. 권한과 네트워크 연결을 확인해 주세요.');
     } finally {
       setLoading(false);
@@ -166,7 +177,7 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <nav aria-label="모바일 관리자 메뉴" className="sticky top-18 z-20 grid grid-cols-3 border-b border-slate-200 bg-white p-2 shadow-sm lg:hidden">
+      <nav aria-label="모바일 관리자 메뉴" className="sticky top-18 z-20 grid grid-cols-4 border-b border-slate-200 bg-white p-2 shadow-sm lg:hidden">
         {ADMIN_VIEWS.map((item) => {
           const isActive = activeView === item.id;
           return <button key={item.id} type="button" aria-current={isActive ? 'page' : undefined} onClick={() => openView(item.id)} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-xs font-black transition-colors ${isActive ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100'}`}><item.icon className="size-4" />{item.label}</button>;
@@ -187,8 +198,10 @@ export default function AdminPage() {
         <main id={activeView} className="min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <section className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div><p className="text-sm font-bold text-teal-700">{activeViewCopy.eyebrow}</p><h1 className="mt-1 font-heading text-3xl font-black tracking-[-0.04em] sm:text-4xl">{activeViewCopy.title}</h1><p className="mt-2 text-base text-slate-600">{activeViewCopy.description}</p></div>
-            <div className="flex flex-wrap gap-2">{activeView !== 'lessons' && <Button variant="outline" onClick={() => downloadCsv(filteredStudents)} disabled={filteredStudents.length === 0}><Download data-icon="inline-start" />CSV 내려받기</Button>}<Button onClick={() => void refresh()} disabled={loading} className="bg-slate-950 text-white hover:bg-slate-800"><RefreshCw className={loading ? 'animate-spin' : ''} data-icon="inline-start" />새로고침</Button></div>
+            {activeView !== 'board' && <div className="flex flex-wrap gap-2">{(activeView === 'dashboard' || activeView === 'students') && <Button variant="outline" onClick={() => downloadCsv(filteredStudents)} disabled={loading || !!error || filteredStudents.length === 0}><Download data-icon="inline-start" />CSV 내려받기</Button>}<Button onClick={() => void refresh()} disabled={loading} className="bg-slate-950 text-white hover:bg-slate-800"><RefreshCw className={loading ? 'animate-spin' : ''} data-icon="inline-start" />새로고침</Button></div>}
           </section>
+
+          {error && activeView !== 'students' && <div role="alert" className="mt-5 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</div>}
 
           {activeView === 'dashboard' && <><section className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
@@ -212,11 +225,13 @@ export default function AdminPage() {
             {error && <div role="alert" className="m-5 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</div>}
             {loading ? <div className="grid min-h-64 place-items-center"><p className="flex items-center gap-2 font-bold text-slate-500"><LoaderCircle className="size-5 animate-spin" />학생 데이터를 불러오는 중...</p></div> : filteredStudents.length === 0 ? <div className="grid min-h-64 place-items-center p-6 text-center"><div><Users className="mx-auto size-8 text-slate-300" /><p className="mt-3 font-black">조건에 맞는 학생이 없습니다</p><p className="mt-1 text-sm text-slate-500">검색어 또는 필터를 바꿔 보세요.</p></div></div> : <div className="overflow-x-auto">
               <table className="w-full min-w-[820px] text-left text-sm">
-                <thead className="bg-slate-50 text-xs text-slate-500"><tr><th className="px-6 py-3 font-bold">학생</th><th className="px-4 py-3 font-bold">학급</th><th className="px-4 py-3 font-bold">전체 진도</th><th className="px-4 py-3 font-bold">최근 차시</th><th className="px-4 py-3 font-bold">평균 퀴즈</th><th className="px-4 py-3 font-bold">최근 활동</th><th className="px-4 py-3 font-bold">상세</th></tr></thead>
+                <thead className="bg-slate-50 text-xs text-slate-500"><tr><th className="px-6 py-3 font-bold">학생</th><th className="px-4 py-3 font-bold">학급</th><th className="px-4 py-3 font-bold">전체 진도</th><th className="px-4 py-3 font-bold">최근 저장 차시</th><th className="px-4 py-3 font-bold">평균 퀴즈</th><th className="px-4 py-3 font-bold">최근 활동</th><th className="px-4 py-3 font-bold">상세</th></tr></thead>
                 <tbody>{filteredStudents.map((student) => { const percent = Math.round((student.completedLessons / ACTIVE_LESSONS) * 100); return <tr key={student.userId} className="border-t border-slate-100 hover:bg-slate-50/80"><td className="px-6 py-4"><p className="font-extrabold">{student.name}</p><p className="text-xs text-slate-500">{student.studentNo}번</p></td><td className="px-4 py-4 font-bold">{student.grade}학년 {student.classNo}반</td><td className="px-4 py-4"><div className="flex min-w-36 items-center gap-3"><Progress value={percent} className="w-24" /><span className="text-xs font-black">{student.completedLessons}/{ACTIVE_LESSONS}</span></div></td><td className="px-4 py-4">{student.latestLesson ? <Badge variant="outline">{student.latestLesson}차시</Badge> : <span className="text-slate-400">-</span>}</td><td className="px-4 py-4 font-bold">{student.averageQuizScore ?? '-'}</td><td className="px-4 py-4 text-slate-600">{formatDate(student.latestUpdatedAt)}</td><td className="px-4 py-4"><Button variant="ghost" size="sm" onClick={() => setSelectedUserId(student.userId)}>보기<ChevronRight data-icon="inline-end" /></Button></td></tr>; })}</tbody>
               </table>
             </div>}
           </section>}
+
+          {activeView === 'board' && <AdminReflectionBoard />}
 
           {activeView === 'lessons' && <section className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
             <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><div className="flex items-center gap-3"><div className="grid size-11 place-items-center rounded-2xl bg-violet-100 text-violet-700"><BarChart3 className="size-5" /></div><div><h2 className="font-heading text-lg font-black">차시별 완료 현황</h2><p className="text-sm text-slate-500">완료 저장된 학생 수</p></div></div><div className="mt-6 space-y-4">{Array.from({ length: ACTIVE_LESSONS }, (_, index) => index + 1).map((lessonNo) => { const count = progress.filter((item) => item.lessonNo === lessonNo && item.completed).length; const percent = students.length > 0 ? Math.round((count / students.length) * 100) : 0; return <div key={lessonNo}><div className="mb-2 flex items-center justify-between text-sm font-bold"><span>{lessonNo}차시</span><span>{count}명 · {percent}%</span></div><Progress value={percent} /></div>; })}</div></article>

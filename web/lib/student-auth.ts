@@ -32,7 +32,6 @@ export function useStudentSession() {
         return;
       }
 
-      setUser(nextUser);
       const { data } = await supabase!
         .from('student_profiles')
         .select('user_id,student_name,grade,class_no,student_no')
@@ -51,7 +50,11 @@ export function useStudentSession() {
           window.location.replace('/admin');
           return;
         }
+        await supabase!.auth.signOut();
+        window.location.replace('/login');
+        return;
       }
+      setUser(nextUser);
       setProfile(data);
       setLoading(false);
     }
