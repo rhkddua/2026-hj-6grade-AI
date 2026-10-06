@@ -204,7 +204,7 @@ export default function LessonTenPage() {
     '무엇을 안전하게 공유할까?',
     '내 앱을 이해하기 쉽게 소개하기',
     '도움이 되는 피드백 찾기',
-    '피드백을 개선 계획으로 바꾸기',
+    '피드백으로 고치고 다시 시험하기',
     '10차시 배움 확인하기',
   ];
   const labels = [
@@ -311,11 +311,11 @@ export default function LessonTenPage() {
               {completed && (
                 <output className="block rounded-2xl border-2 border-primary p-5">
                   <span className="block text-xl font-black">
-                    10차시 완료! 모든 모험을 마쳤어요.
+                    10차시 완료!
                   </span>
                   <span className="mt-2 block leading-7">
-                    문제를 찾고 앱을 만들며, 테스트와 피드백으로 개선하는 AI
-                    코딩 과정을 완주했어요.
+                    발표·피드백·개선의 10차시 활동 기록을 저장했어요.
+                    다른 차시의 완료 상태는 수업 홈에서 확인해요.
                   </span>
                 </output>
               )}

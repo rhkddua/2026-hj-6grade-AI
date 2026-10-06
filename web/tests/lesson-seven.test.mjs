@@ -1,0 +1,8 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import './register-ts-imports.mjs';
+const { initialActivities, restoreActivities, lessonSevenRequirements, planIsSafe } = await import('../lib/lesson-seven.ts');
+const valid={...initialActivities(),conceptChoice:0,conceptChecked:true,userAction:0,appAction:0,feedback:0,flowChecked:true,featurePlan:'친구가 추천 버튼을 누르면 놀이와 준비물을 골라 결과 제목과 다시 추천 안내를 큰 글씨로 보여 줘.',planChecked:true,resultChoice:1,testChoices:[true,true,true],testChecked:true,revisionPrompt:'결과 제목에 추천 완료와 다음 행동을 알려 주세요.',answers:[0,0,0],quizChecked:true};
+test('7차시 기존 14키·6조건·답 의미를 복원한다',()=>{assert.deepEqual(restoreActivities(JSON.parse(JSON.stringify(valid))),valid);assert.equal(Object.keys(valid).length,14);assert.deepEqual(lessonSevenRequirements(valid,'실제 의견과 예상은 구별해 기록해야 해요.'),Array(6).fill(true));});
+test('7차시 흐름 오답·미확인·미점검·짧은 기록은 완료를 막는다',()=>{for(const patch of [{conceptChoice:1},{userAction:1},{appAction:1},{feedback:1},{flowChecked:false},{planChecked:false},{featurePlan:'짧음'},{resultChoice:0},{testChoices:[true,false,true]},{revisionPrompt:'짧음'},{answers:[1,0,0]},{quizChecked:false}])assert.equal(lessonSevenRequirements({...valid,...patch},'충분히 긴 성찰 문장입니다.').every(Boolean),false);assert.equal(lessonSevenRequirements(valid,'짧음').every(Boolean),false);});
+test('7차시 안전 금지문은 허용하고 합성 값은 차단한다',()=>{assert.equal(planIsSafe('가'.repeat(34)),false);assert.equal(planIsSafe(valid.featurePlan+' 비밀번호를 요구하지 않는다.'),true);assert.equal(planIsSafe(valid.featurePlan+' 전화번호를 받지 않게. 010-0000-0000'),false);assert.equal(planIsSafe(valid.featurePlan+' student@example.test'),false);});

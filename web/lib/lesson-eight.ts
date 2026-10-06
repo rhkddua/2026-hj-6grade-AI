@@ -1,3 +1,5 @@
+import { textAppearsSafe } from './prompt-safety';
+
 export const stages = [
   '두 기능 알아보기',
   '기능 연결 설계하기',
@@ -110,9 +112,7 @@ export function restoreActivities(value: unknown): LessonEightActivities {
 
 export function promptIsSafe(prompt: string) {
   const text = prompt.trim();
-  return text.length >= 45
-    && !/(비밀번호|전화번호|집 주소|이메일 주소|주민등록|실제 이름)/.test(text)
-    && !/\d{3}[- ]?\d{3,4}[- ]?\d{4}/.test(text);
+  return text.length >= 45 && textAppearsSafe(text);
 }
 
 export function lessonEightRequirements(activities: LessonEightActivities, reflection: string) {

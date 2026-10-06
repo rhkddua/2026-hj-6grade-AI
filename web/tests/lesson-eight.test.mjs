@@ -1,0 +1,8 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import './register-ts-imports.mjs';
+const { initialActivities, restoreActivities, lessonEightRequirements, promptIsSafe } = await import('../lib/lesson-eight.ts');
+const valid={...initialActivities(),conceptChoice:0,conceptChecked:true,firstFeature:0,sharedValue:0,secondFeature:0,connectionChecked:true,buildPrompt:'시간을 선택하면 추천 기능에 전달하고 5분은 짧은 스트레칭, 15분은 준비물이 필요한 활동, 미선택은 선택 안내를 보여 줘.',promptChecked:true,testChoices:[true,true,true],testChecked:true,revisionPrompt:'미선택 상태에서 먼저 시간을 선택하라는 안내를 크게 보여 줘.',answers:[0,0,0],quizChecked:true};
+test('8차시 기존 13키·6조건·답 의미를 복원한다',()=>{assert.deepEqual(restoreActivities(JSON.parse(JSON.stringify(valid))),valid);assert.equal(Object.keys(valid).length,13);assert.deepEqual(lessonEightRequirements(valid,'전달한 시간이 실제 결과에 쓰이는지 확인해요.'),Array(6).fill(true));});
+test('8차시 연결 오답·성공 미확인·짧은 기록은 완료를 막는다',()=>{for(const patch of [{conceptChoice:1},{firstFeature:1},{sharedValue:1},{secondFeature:1},{connectionChecked:false},{promptChecked:false},{buildPrompt:'짧음'},{testChoices:[true,true,false]},{testChecked:false},{revisionPrompt:'짧음'},{answers:[1,0,0]},{quizChecked:false}])assert.equal(lessonEightRequirements({...valid,...patch},'충분히 긴 성찰 문장입니다.').every(Boolean),false);assert.equal(lessonEightRequirements(valid,'짧음').every(Boolean),false);});
+test('8차시 45자 기준·안전 금지문·합성 값 차단을 유지한다',()=>{assert.equal(promptIsSafe('가'.repeat(44)),false);assert.equal(promptIsSafe(valid.buildPrompt+' 비밀번호를 요구하지 않는다.'),true);assert.equal(promptIsSafe(valid.buildPrompt+' 전화번호를 받지 않게. 010-0000-0000'),false);assert.equal(promptIsSafe(valid.buildPrompt+' student@example.test'),false);});

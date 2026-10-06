@@ -1,0 +1,6 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+const { initialActivities, restoreActivities, lessonTwoRequirements } = await import('../lib/lesson-two.ts');
+const valid={...initialActivities(),runs:[true,true,true],textCount:3,blockCount:3,aiSpecific:true,classifications:[0,1,2,0,1,2],classificationChecked:true,comparison:['반복 숫자를2에서3으로 바꾸어 결과를 확인했어요.','블록의 반복을3으로 바꾸어 세 줄을 확인했어요.','AI 예시에 정확한 세 줄 조건을 넣어 결과를 확인했어요.'],answers:[0,1,2],quizChecked:true};
+test('2차시 기존10키·5조건·성공이력은 현재입력과 독립적으로 복원된다',()=>{const past={...valid,textCount:2,blockCount:1,aiSpecific:false};assert.deepEqual(restoreActivities(past),past);assert.equal(Object.keys(past).length,10);assert.deepEqual(lessonTwoRequirements(past,'성공 이력과 현재 결과는 구별해야 해요.'),Array(5).fill(true));});
+test('2차시 미성공·분류/퀴즈오답·미채점·비교문누락은 완료를 막는다',()=>{for(const patch of [{runs:[true,false,true]},{classifications:[1,1,2,0,1,2]},{classificationChecked:false},{comparison:['짧음',valid.comparison[1],valid.comparison[2]]},{answers:[1,1,2]},{quizChecked:false}])assert.equal(lessonTwoRequirements({...valid,...patch},'충분히 긴 성찰 문장입니다.').every(Boolean),false);assert.equal(lessonTwoRequirements(valid,'짧음').every(Boolean),false);});

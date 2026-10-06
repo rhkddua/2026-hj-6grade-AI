@@ -1,3 +1,5 @@
+import { textAppearsSafe } from './prompt-safety';
+
 export const stages = [
   '생활 속 문제 찾기',
   '나의 앱 계획하기',
@@ -34,7 +36,7 @@ export const questions = [
     tip: '각 기능이 앱의 목표에 필요하고 서로 이어져야 해요.',
   },
   {
-    title: '준비된 결과를 본 뒤 해야 할 일은?',
+    title: '내 Canva 앱 결과를 본 뒤 해야 할 일은?',
     options: ['사용자처럼 직접 시험하고 구체적으로 수정해요.', '화면이 보이면 바로 완성했다고 해요.', '문제가 있어도 기능만 더 추가해요.'],
     answer: 0,
     tip: '처음 세운 목표와 테스트 결과를 비교해 고칠 점을 알려 줘요.',
@@ -124,8 +126,7 @@ export function restoreActivities(value: unknown): LessonNineActivities {
 }
 
 export function textIsSafe(text: string) {
-  return !/(비밀번호|전화번호|집 주소|이메일 주소|주민등록|실제 이름)/.test(text)
-    && !/\d{3}[- ]?\d{3,4}[- ]?\d{4}/.test(text);
+  return textAppearsSafe(text);
 }
 
 export function planIsReady(activities: LessonNineActivities) {

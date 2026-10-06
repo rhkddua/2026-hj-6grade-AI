@@ -1,4 +1,6 @@
-export const stages = ['한 기능 앱 이해하기', '입력·동작·결과 정하기', '한 기능 제작 지시 쓰기', '준비된 앱 테스트하기', '배움 확인하기'];
+import { textAppearsSafe } from './prompt-safety';
+
+export const stages = ['한 기능 앱 이해하기', '입력·동작·결과 정하기', '한 기능 제작 지시 쓰기', '내 앱 한 기능 시험하기', '배움 확인하기'];
 
 export const flowOptions = {
   inputs: ['버튼 하나를 누르기', '친구의 실제 이름을 입력하기', '비밀번호를 입력하기'],
@@ -60,7 +62,7 @@ export function restoreActivities(value: unknown): LessonSixActivities {
 
 export function promptIsSafe(prompt: string) {
   const text = prompt.trim();
-  return text.length >= 35 && !/(비밀번호|전화번호|집 주소|이메일 주소|주민등록|실제 이름)/.test(text) && !/\d{3}[- ]?\d{3,4}[- ]?\d{4}/.test(text);
+  return text.length >= 35 && textAppearsSafe(text);
 }
 
 export function lessonSixRequirements(a: LessonSixActivities, reflection: string) {

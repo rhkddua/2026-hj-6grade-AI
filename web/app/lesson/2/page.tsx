@@ -256,7 +256,7 @@ export default function LessonTwoPage() {
         </aside>
         <section className="min-w-0 rounded-3xl border bg-card p-5 shadow-sm sm:p-8">
           <p className="text-sm font-bold text-primary">
-            STEP {step} / 5 · {['5분', '15분', '7분', '8분', '5분'][step - 1]}
+            STEP {step} / 5 · 활동 예상 {['3분', '9분', '5분', '8분', '7분'][step - 1]} · 접속·저장·여유 8분 별도
           </p>
           <h2
             ref={heading}
@@ -293,7 +293,7 @@ export default function LessonTwoPage() {
                 <h3 className="font-black">완료 전 확인</h3>
                 <ul className="mt-3 space-y-2">
                   {[
-                    '세 가지 방법으로 목표 결과 실행',
+                    '세 가지 방법의 3줄 성공 경험',
                     '특징 분류 6개 모두 정답 확인',
                     '비교 문장 3개 작성 (각 10자 이상)',
                     '퀴즈 3문항 모두 정답 확인',

@@ -188,7 +188,7 @@ export default function LessonFivePage() {
     'Canva AI 코드가 하는 일',
     '만들 앱의 계획 정하기',
     '안전하고 구체적인 제작 지시',
-    '준비된 결과 테스트하기',
+    '내 Canva 앱 시험하고 고치기',
     '배움 확인하기',
   ];
   const labels = [
@@ -255,7 +255,7 @@ export default function LessonFivePage() {
               </ol>
             </nav>
             <p className="mt-5 text-sm leading-6 text-muted-foreground">
-              목표: 안전한 제작 지시를 쓰고, 준비된 앱 결과를 테스트하며 개선할
+              목표: 안전한 제작 지시를 쓰고, 내 Canva 앱을 테스트하며 개선할
               수 있어요.
             </p>
           </div>

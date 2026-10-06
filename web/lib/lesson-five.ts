@@ -1,3 +1,5 @@
+import { textAppearsSafe } from './prompt-safety';
+
 export const stages = ['Canva AI 코드 알아보기', '앱 제작 계획 세우기', '안전한 제작 지시 쓰기', '결과 테스트하고 고치기', '배움 확인하기'];
 
 export const planOptions = {
@@ -7,7 +9,7 @@ export const planOptions = {
 };
 
 export const testChecks = [
-  '버튼을 눌러 준비된 화면이 바뀌는지 확인했어요.',
+  '내 Canva 앱의 버튼을 눌러 화면이 바뀌는지 확인했어요.',
   '글자가 너무 작거나 어려운 말이 없는지 확인했어요.',
   '개인정보를 입력하라고 하지 않는지 확인했어요.',
 ];
@@ -15,7 +17,7 @@ export const testChecks = [
 export const questions = [
   { title: 'Canva AI 코드로 앱을 만들 때 가장 알맞은 시작은?', options: ['무엇을 만들지와 누가 쓸지 먼저 정해요.', '친구의 개인정보를 많이 넣어요.', '결과를 보지 않고 바로 제출해요.'], answer: 0, tip: '사용자와 해결할 문제를 먼저 정하면 필요한 기능을 고르기 쉬워요.' },
   { title: '안전한 제작 지시에 넣으면 좋은 내용은?', options: ['친구의 주소와 전화번호', '목표, 사용할 사람, 필요한 기능과 화면 모양', '비밀번호와 실제 계정 정보'], answer: 1, tip: '앱의 목적과 기능은 구체적으로 말하고 개인정보는 넣지 않아요.' },
-  { title: '준비된 결과를 테스트한 뒤 알맞은 행동은?', options: ['불편한 점을 구체적으로 적어 고쳐 달라고 해요.', '확인하지 않고 끝내요.', '더 많은 개인정보를 넣어요.'], answer: 0, tip: '사람이 직접 써 보고, 고칠 점을 구체적으로 알려 주며 개선해요.' },
+  { title: '내 앱을 테스트한 뒤 알맞은 행동은?', options: ['불편한 점을 구체적으로 적어 고쳐 달라고 해요.', '확인하지 않고 끝내요.', '더 많은 개인정보를 넣어요.'], answer: 0, tip: '사람이 직접 써 보고, 고칠 점을 구체적으로 알려 주며 개선해요. 개인정보가 없는 요청이어도 기능 문제를 두고 장식만 바꿔서는 목적을 이루기 어려워요.' },
 ];
 
 export type LessonFiveActivities = {
@@ -60,7 +62,7 @@ export function restoreActivities(value: unknown): LessonFiveActivities {
 
 export function promptIsSafe(prompt: string) {
   const text = prompt.trim();
-  return text.length >= 30 && !/(비밀번호|전화번호|집 주소|이메일 주소|주민등록)/.test(text) && !/\d{3}[- ]?\d{3,4}[- ]?\d{4}/.test(text);
+  return text.length >= 30 && textAppearsSafe(text);
 }
 
 export function lessonFiveRequirements(a: LessonFiveActivities, reflection: string) {

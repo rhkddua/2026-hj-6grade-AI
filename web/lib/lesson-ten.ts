@@ -1,3 +1,5 @@
+import { textAppearsSafe } from './prompt-safety';
+
 export const stages = ['안전하게 공유하기', '앱 소개 준비하기', '좋은 피드백 주고받기', '피드백으로 개선하기', '배움 확인하기'];
 
 export const shareOptions = [
@@ -97,7 +99,7 @@ export function restoreActivities(value: unknown): LessonTenActivities {
 }
 
 export function textIsSafe(text: string) {
-  return !/(비밀번호|전화번호|집 주소|이메일 주소|주민등록|실제 이름)/.test(text) && !/\d{3}[- ]?\d{3,4}[- ]?\d{4}/.test(text);
+  return textAppearsSafe(text);
 }
 
 export function presentationIsReady(a: LessonTenActivities) {

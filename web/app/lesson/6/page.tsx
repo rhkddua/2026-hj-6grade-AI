@@ -188,7 +188,7 @@ export default function LessonSixPage() {
     '한 기능 앱이란?',
     '입력·동작·결과 정하기',
     '한 기능 제작 지시 쓰기',
-    '준비된 앱 테스트하기',
+    '내 Canva 앱의 한 기능 시험하기',
     '배움 확인하기',
   ];
   const labels = [

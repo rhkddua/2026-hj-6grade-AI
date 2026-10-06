@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import { LessonSchedule } from '@/components/lesson-workflow';
 import { Button } from '@/components/ui/button';
 import { ReflectionBoardActions } from '@/components/reflection-board-actions';
 import {
@@ -78,11 +79,11 @@ const timeline = [
     color: 'bg-blue-100 text-blue-700',
   },
   {
-    period: '1970년대~',
+    period: '1950년대부터 등장',
     name: '고급 언어',
     code: 'printf("Hello");',
     description:
-      'C처럼 사람이 이해하기 쉬운 문법으로 복잡한 프로그램을 만들었어요.',
+      '고급 언어는 1950년대부터 등장했어요. 이 코드는 1970년대에 나온 C 언어의 예예요.',
     icon: Code2,
     color: 'bg-violet-100 text-violet-700',
   },
@@ -180,7 +181,7 @@ const mathRounds = [
     icon: Cpu,
     accent: 'bg-stone-100 text-stone-700',
     prompt: '수업용 기계어로 3을 불러오고, 2를 더한 뒤 결과를 보여 주세요.',
-    hint: '앞 4자리는 할 일을 나타내는 명령어이고, 뒤 4자리는 계산에 사용할 숫자예요.',
+    hint: '각 줄 앞 4자리는 할 일, 뒤 4자리는 숫자예요. 1줄: 3 넣기 → 2줄: 2 더하기 → 3줄: 결과 보여 주기. 외우지 말고 아래 약속을 보며 한 줄씩 입력해요.',
     placeholder: '0001 0011\n0010 0010\n1111 0000',
     guide: [
       '명령 0001 = 불러오기',
@@ -195,7 +196,7 @@ const mathRounds = [
     icon: Terminal,
     accent: 'bg-blue-100 text-blue-700',
     prompt: '컴퓨터 안의 계산 방 A를 사용해 같은 계산을 해 보세요.',
-    hint: '어셈블리어는 컴퓨터 내부의 계산 방 A를 직접 사용해요. 세 명령을 차례로 입력해 보세요.',
+    hint: '계산 방 A는 숫자를 잠시 담는 곳이에요. MOV는 넣기, ADD는 더하기, OUT은 보여 주기예요.',
     placeholder: 'MOV A, #3\nADD A, #2\nOUT A',
     guide: ['MOV A, #3', 'ADD A, #2', 'OUT A'],
   },
@@ -864,6 +865,7 @@ export default function LessonOnePage() {
                   가 정해져 있지 않았기 때문입니다.
                 </p>
               </div>
+              <div className="mt-5"><LessonSchedule>접속·목표 3 + 명령·이유 3 + 언어 비교 3 + 이동4개 6 + 수학3개 10 + 순서 3 + 퀴즈·짝 설명·성찰 7 + 저장·정리·전환 3 + 여유 2 = 40분. 교사는 기호 위치와 줄바꿈을 시범 보여요. 지원 학생은 한 줄 뜻 말하기→입력→확인으로 진행해요. FAQ·팝업·추가 숫자 실험은 선택이며 미완료 필수 활동은 저장해 이어가요.</LessonSchedule></div>
               <fieldset className="mt-7">
                 <legend className="text-lg font-black">
                   로봇이 가장 잘 이해할 명령을 골라 보세요.
@@ -915,6 +917,7 @@ export default function LessonOnePage() {
                 코딩의 역사는 컴퓨터에게 명령하는 방법을 더 쉽고 정확하게 바꾸어
                 온 과정이에요.
               </p>
+              <p className="mt-3 text-base leading-7">연도는 외우지 않아도 돼요. 같은 일을 어떤 표현으로 더 쉽게 읽을지 비교해요. 앞의 숫자·영어 명령을 사람이 읽는 표현으로 바꾸어 보세요. 새 표현이 생겨도 이전 언어는 목적에 따라 함께 쓰여요.</p>
               <div className="mt-7 space-y-3">
                 {timeline.map((item) => (
                   <article
@@ -1052,12 +1055,12 @@ export default function LessonOnePage() {
                       게임 속 실제 이야기
                     </p>
                     <p className="mt-2 text-sm leading-7 text-violet-950/85">
-                      1999년에 나온 ‘롤러코스터 타이쿤’은 많은 손님과 놀이기구를
-                      빠르게 움직이기 위해 코드의 대부분을 x86 어셈블리어로
-                      만들었어요. 언어마다 장점과 쓰임이 다르다는 사례예요.
+                      ‘롤러코스터 타이쿤’ 개발자는 코드의 약99%를 x86
+                      어셈블리어·기계어로, 일부를 C로 만들었다고 설명해요.
+                      여러 언어를 함께 사용한 실제 사례예요.
                     </p>
                     <a
-                      href="https://www.chrissawyergames.com/faq.htm"
+                      href="https://www.chrissawyergames.com/faq3.htm"
                       target="_blank"
                       rel="noreferrer"
                       className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-violet-800 underline decoration-violet-400 underline-offset-4"
@@ -1233,7 +1236,7 @@ export default function LessonOnePage() {
                       >
                         {activeSolved
                           ? activeRound.success
-                          : `아직 출발점이에요. ${activeRound.hint}`}
+                          : `목표 명령과 달라요. 출발점 그림은 다시 고르라는 표시예요. ${activeRound.hint}`}
                       </output>
                     )}
                   </div>
@@ -1287,6 +1290,7 @@ export default function LessonOnePage() {
                     기계어 약속을 사용해요. 입력한 문장은 실행하지 않고, 약속한
                     모양인지 안전하게 확인합니다.
                   </div>
+                  <div className="mt-4 rounded-2xl border bg-card p-4 leading-7"><p className="font-black">입력 전에 3 → 5 → 화면의 5를 예상해요</p><p className="mt-2">이동의 0001은 오른쪽, 계산의 0001은 불러오기예요. 두 활동은 서로 다른 수업용 약속을 써요. 기계어·어셈블리 계산은 아래 3+2 모양만 확인해요. JavaScript도 두 숫자의 합을 보여 주는 제한된 모형이에요.</p><p className="mt-2">줄바꿈은 Enter, 쉼표는 A 바로 뒤, #은 숫자 바로 앞이에요. 예시를 보며 한 줄씩 써도 돼요. 기호를 외운 수보다 각 줄이 하는 일을 설명하는 것이 중요해요. 빠른 학생은 JavaScript 숫자를 바꾸어 예상·결과를 비교하고 3과2로 돌아와 실행 버튼을 다시 눌러 필수 미션을 마쳐요.</p></div>
                   <div className="mt-5 space-y-5">
                     {mathRounds.map((round, index) => {
                       const RoundIcon = round.icon;
@@ -1329,7 +1333,7 @@ export default function LessonOnePage() {
                               <Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" />
                               <div className="min-w-0">
                                 <p className="text-sm font-bold leading-6">
-                                  힌트: 어셈블리어는 컴퓨터 내부의 계산 방{' '}
+                                  힌트: 이 수업 모형에서 숫자를 잠시 담는 방{' '}
                                   <code className="rounded bg-white px-1.5 py-0.5">
                                     A
                                   </code>
@@ -1356,6 +1360,7 @@ export default function LessonOnePage() {
                                     계산 방 A에 남은 결과를 화면에 보여 줘요.
                                   </li>
                                 </ul>
+                                <p className="mt-3 text-base leading-7">1줄 MOV A, #3 → A에3 / 2줄 ADD A, #2 → A에5 / 3줄 OUT A → 화면에5. 쉼표는 A 바로 뒤, #은 숫자 바로 앞이에요. 한 줄씩 뜻을 말하고 예시를 보며 입력해요.</p>
                               </div>
                             </div>
                           ) : isJavascript ? (
@@ -1446,7 +1451,7 @@ export default function LessonOnePage() {
                             <div className="mt-3 flex gap-3 rounded-2xl bg-amber-50 p-4 text-amber-950">
                               <Lightbulb className="mt-0.5 size-5 shrink-0 text-amber-600" />
                               <div className="min-w-0">
-                                <p className="text-sm leading-6">
+                                <p className="text-base leading-7">
                                   <strong>힌트:</strong> {round.hint}
                                 </p>
                                 <div className="mt-2 flex flex-wrap gap-2">
@@ -1869,6 +1874,7 @@ export default function LessonOnePage() {
                 </output>
               )}
               <div className="mt-8 rounded-2xl border bg-muted/40 p-5">
+                <p className="mb-3 text-base leading-7">짝에게 같은 이동이나 계산에서 읽기 쉬웠던 표현과 이유를 말해요. 한 줄의 뜻 또는 순서를 바꾸면 생길 일을 근거로 성찰을 써요. 틀을 모두 채우기보다 한 근거를 골라도 돼요.</p>
                 <label
                   htmlFor="reflection"
                   className="flex items-center gap-2 font-black"
@@ -1883,7 +1889,7 @@ export default function LessonOnePage() {
                     dirty();
                     setReflection(event.target.value);
                   }}
-                  placeholder="예: 코딩 언어는 컴퓨터에게 더 쉽게 명령하기 위해 발전해 왔다."
+                  placeholder="같은 이동/계산에서 __표현이 읽기 쉬웠어요. __가 뜻을 보여 주기 때문이에요. 순서를 바꾸면 __라서 순서와 구체성이 중요해요."
                   className="mt-3 min-h-24 w-full resize-y rounded-xl border bg-card p-3 text-base leading-7 outline-none focus:border-primary focus:ring-3 focus:ring-primary/15"
                   maxLength={160}
                 />
@@ -1916,7 +1922,7 @@ export default function LessonOnePage() {
                     첫걸음 탐험가 배지 획득!
                   </span>
                   <span className="mt-1 block text-sm text-teal-50">
-                    1차시의 모든 활동을 마쳤습니다.
+                    1차시의 필수 활동 기록을 저장했어요.
                   </span>
                 </output>
               )}
