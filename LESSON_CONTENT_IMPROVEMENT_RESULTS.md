@@ -1,7 +1,7 @@
 # AI 코딩 교실 콘텐츠 개선 구현 결과
 
 갱신: 2026-10-06(KST). **1~10차시 모두 구현·검증·게시 완료.**
-콘텐츠 개선 완료는 version50이며, 이후 게시판 링크 수정까지 반영한 최신 운영은 **version51 / e1330d1ea5608badfe1ca92ec79b0c58cb0c3da0**, [기존 공개 사이트](https://hj-ai-coding-class-2026.rhkdduavud.chatgpt.site)이다. 미착수 차시는 없다. 실제 학생 수업 시간·효과·흥미는 미실측이며 아래40분은 교사 운영을 위한 설계 추정이다.
+콘텐츠 개선 완료는 version50이며, 이후 게시판 링크·홈 진도 수정까지 반영한 최신 운영은 **version53 / e0aeb2c9696f2c8ad0aad1e9f2a868989424d72f**, [기존 공개 사이트](https://hj-ai-coding-class-2026.rhkdduavud.chatgpt.site)이다. 미착수 차시는 없다. 실제 학생 수업 시간·효과·흥미는 미실측이며 아래40분은 교사 운영을 위한 설계 추정이다.
 
 ## 공통 보존과 최종 검증
 
@@ -9,9 +9,9 @@
 - 기존 미커밋 문서·미추적 테스트·학생 기록을 보존했다. 차시별 저장 키·타입·5단계·보기/정답의 순서와 의미·배점·필수 수·최소 길이·기본값/복원을 유지했다. 새 비교는 기존 글칸에 연결하며 과거 체크를 새 실제 수행 증거로 해석하지 않는다.
 - 공통 안전 검사 소비5~10차시를 포함한 최종 회귀31개와 전체 build 통과. 변경 content/lib/tests 및 1·8~10 page lint 통과. 2~7 page의 기존 각7개 lint 오류는 별도 항목이며 전체 저장소 lint 통과를 주장하지 않는다.
 - 차시별 전용 UI의 단계·오답/미완료 차단·저장/새로고침 복원·완료/수정 해제/재완료·키보드·375px와 공개 핵심 저장/복원을 확인했다. 최종 읽기 전용 독립 diff 감사에서 새 실질 결함 없음.
-- 최종 전용 계정 요약:1~10 모두 completed=true, 키13/10/9/10/14/14/14/13/16/15, 점수1차시2점·나머지3점. 나머지 작업 전후3·4차시 요약·갱신 시각 불변. 활동 원문이나 실제 학생 상세/전체 CSV는 조회하지 않았다. 증거: web/outputs/lesson-e2e/content-improvement-before-rest-20261006.json 및 content-improvement-final-20261006.json.
+- 콘텐츠 개선 당시 최종 전용 계정 요약:1~10 모두 completed=true, 키13/10/9/10/14/14/14/13/16/15, 점수1차시2점·나머지3점. 나머지 작업 전후3·4차시 요약·갱신 시각 불변. 활동 원문이나 실제 학생 상세/전체 CSV는 조회하지 않았다. 증거: web/outputs/lesson-e2e/content-improvement-before-rest-20261006.json 및 content-improvement-final-20261006.json.
 - 웹 체크는 자기보고다. 개발 테스트는 웹 UI/완료 계산을 검증했으며 실제 Canva 제작·작품 성공·학생 짝 시험을 수행하지 않았음을 테스트 글에 표시했다. 네트워크 실패 주입·게시판 전송·보관함 등록·교사 대시보드 전체 E2E는 이번 범위 밖이다. 기존 LESSON_E2E_RESULTS.md의 미검증 항목을 일괄 통과 처리하지 않았다.
-- 각 차시 게시 버전은 아래 당시 결과이며 **현재 최신 운영은 version51(게시판 링크 수정)**이다.
+- 각 차시 게시 버전은 아래 당시 결과이며 **현재 최신 운영은 version53(게시판 링크·홈 진도 수정)**이다.
 
 ## 1차시 — 구현·검증·게시 완료 (2026-10-06)
 
@@ -114,5 +114,5 @@
 - version50 저장/게시 성공, deployment appgdep_6ac44008a5688191ab8eb2fa6fac1f08, 환경 revision2/public/기존 URL 유지. 정확한 소스43398c892ebca1f8d6dd8cac61094f7f33d6c25f로 마지막 build·archive·source push·버전 저장을 수행했다.
 - 3·4차시의 당시 마무리 version42 / b4af2bfc6d9652287738c428a0149a32f33f275e는 status 피드백을 block으로 보완한 이력이다. 해당9개 테스트/build·375px·공개 복원은 당시 통과했다. 증거 final-public-preview.png를 보존하며 현재 운영 기준과 구별한다.
 - 로컬/공개 테스트 계정 로그아웃, viewport 복원, 이번 개발 서버 종료. 게시용 임시 exclude를 원래 바이트로 복원해 tests/staff-access-live.mjs의 미추적 상태를 확인했다. 이번 나머지 작업의 배포 archive만 제거했고 기존 staging/archive·루트 작업·SQL 테스트는 보존했다. web Git은 해당 기존 미추적 파일 외 변경이 없다.
-- 콘텐츠 개선 당시의 공통 ReflectionBoardActions 경고는 이후 version51의 링크 교체로 제거했다. 홈의 정적인 현재 차시/진도 안내는 이번 변경 밖이다. 완료 기록은 각 차시 복원과 전용 DB 요약으로 확인했다.
+- 콘텐츠 개선 당시의 공통 ReflectionBoardActions 경고는 이후 version51의 링크 교체로 제거했다. 홈의 정적 진도와 단계 이동 완료 해제도 이후 version53에서 수정했다(STUDENT_HOME_PROGRESS_FIX_RESULTS.md). 완료 기록은 각 차시 복원과 전용 DB 요약으로 확인했다.
 - **다음 재개:** 실제 수업 관찰 결과 또는 새 사용자 요청. Canva 생성/수정 대기·짝 시험·40분 완료/미완료·예상/실제와 성찰 근거를 관찰한다. 미완료 구현 차시를 재개하는 작업은 없다.

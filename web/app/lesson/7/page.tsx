@@ -138,7 +138,9 @@ export default function LessonSevenPage() {
   }, []);
   function go(next: number) {
     if (next === step) return;
-    dirty();
+    revision.current += 1;
+    setStatus('변경 내용을 저장할 예정이에요');
+    setSaveError(false);
     setStep(next);
     window.setTimeout(() => heading.current?.focus(), 0);
   }

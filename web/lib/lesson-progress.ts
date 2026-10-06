@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import type { CourseLessonRecord } from './student-course-progress';
 
 export type LessonProgress = {
   lessonNo: number;
@@ -15,6 +16,21 @@ async function getStudentUserId() {
   const { data } = await supabase.auth.getUser();
   if (!data.user || data.user.is_anonymous) throw new Error('학생 로그인이 필요합니다.');
   return data.user.id;
+}
+
+export async function loadStudentCourseProgress(): Promise<CourseLessonRecord[]> {
+  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase가 설정되지 않았습니다.');
+  const userId = await getStudentUserId();
+  const { data, error } = await supabase.from('lesson_progress')
+    .select('lesson_no,current_step,completed')
+    .eq('user_id', userId)
+    .order('lesson_no');
+  if (error) throw error;
+  return (data ?? []).map(row => ({
+    lessonNo: row.lesson_no,
+    currentStep: row.current_step,
+    completed: row.completed,
+  }));
 }
 
 export async function loadLessonProgress(lessonNo: number, includeActivities = false): Promise<LessonProgress | null> {

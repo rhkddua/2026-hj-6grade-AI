@@ -10,7 +10,6 @@ import {
   Home,
   LogOut,
   Lightbulb,
-  LockKeyhole,
   MessageSquareText,
   Rocket,
   Sparkles,
@@ -26,25 +25,32 @@ import {
 } from '@/components/ui/progress';
 import { signOutStudent, useStudentSession } from '@/lib/student-auth';
 import { useStudentBadge } from '@/lib/use-student-badge';
+import { useStudentCourseProgress } from '@/lib/use-student-course-progress';
 
 const lessons = [
-  { no: 1, title: '코딩은 어떻게 발전했을까?', status: 'current' },
-  { no: 2, title: '전통 코딩과 AI 코딩', status: 'open' },
-  { no: 3, title: 'AI는 무엇을 잘하고 못할까?', status: 'open' },
-  { no: 4, title: 'AI에게 잘 지시하는 방법', status: 'open' },
-  { no: 5, title: 'Canva AI 코드 시작하기', status: 'open' },
-  { no: 6, title: '한 기능 앱 만들기', status: 'open' },
-  { no: 7, title: '앱 기능 설계하기', status: 'open' },
-  { no: 8, title: '두 기능 앱 만들기', status: 'open' },
-  { no: 9, title: '나에게 필요한 앱 만들기', status: 'open' },
-  { no: 10, title: '공유하고 개선하기', status: 'open' },
+  { no: 1, title: '코딩은 어떻게 발전했을까?' },
+  { no: 2, title: '전통 코딩과 AI 코딩' },
+  { no: 3, title: 'AI는 무엇을 잘하고 못할까?' },
+  { no: 4, title: 'AI에게 잘 지시하는 방법' },
+  { no: 5, title: 'Canva AI 코드 시작하기' },
+  { no: 6, title: '한 기능 앱 만들기' },
+  { no: 7, title: '앱 기능 설계하기' },
+  { no: 8, title: '두 기능 앱 만들기' },
+  { no: 9, title: '나에게 필요한 앱 만들기' },
+  { no: 10, title: '공유하고 개선하기' },
 ];
 
 export default function HomePage() {
   const { user, profile, loading } = useStudentSession();
   const badge = useStudentBadge(user?.id);
+  const course = useStudentCourseProgress(user?.id);
+  const lessonCards = lessons.map(lesson => ({
+    ...lesson,
+    ...course.lessons[lesson.no - 1],
+  }));
+  const nextLesson = lessonCards.find(lesson => lesson.no === course.nextLessonNo);
 
-  if (loading)
+  if (loading || course.loading)
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <p className="font-bold text-muted-foreground">
@@ -153,51 +159,54 @@ export default function HomePage() {
                 안녕하세요, {studentName} 학생!
               </h1>
               <p className="mt-2 text-base leading-7 text-muted-foreground">
-                오늘은 컴퓨터에게 명령하는 방법이 어떻게 발전해 왔는지 알아봐요.
+                {course.error ? '저장한 진도를 다시 확인해 주세요.' : nextLesson ? `이어서 ‘${nextLesson.title}’ 수업을 배워요.` : '10차시를 모두 마쳤어요. 내가 배운 내용을 다시 살펴봐요.'}
               </p>
             </div>
             <div className="w-full rounded-2xl border bg-card p-4 shadow-sm sm:w-64">
-              <Progress value={10}>
+              {course.error ? <div role="alert">
+                <p className="font-bold">진도를 불러오지 못했어요.</p>
+                <Button className="mt-3" variant="outline" onClick={course.retry}>다시 확인하기</Button>
+              </div> : <><Progress value={course.progressPercent}>
                 <ProgressLabel>전체 수업 진도</ProgressLabel>
-                <ProgressValue>{() => '10%'}</ProgressValue>
+                <ProgressValue>{() => `${course.progressPercent}%`}</ProgressValue>
               </Progress>
               <p className="mt-3 text-xs text-muted-foreground">
-                10차시 중 1차시를 배우고 있어요.
+                10차시 중 {course.completedCount}차시를 완료했어요.
               </p>
+              </>}
             </div>
           </section>
 
-          <section className="current-lesson-card relative overflow-hidden rounded-[28px] p-6 sm:p-8">
+          {!course.error && <section className="current-lesson-card relative overflow-hidden rounded-[28px] p-6 sm:p-8">
             <div className="relative z-10 max-w-2xl">
               <div className="mb-5 flex flex-wrap items-center gap-2">
                 <Badge className="h-7 bg-white/18 px-3 text-white hover:bg-white/18">
-                  지금 배울 차시
+                  {nextLesson ? '이어서 배울 차시' : '10차시 모두 완료'}
                 </Badge>
                 <span className="text-sm font-semibold text-teal-50">
-                  1 / 10
+                  {nextLesson ? nextLesson.no : 10} / 10
                 </span>
               </div>
-              <p className="text-sm font-bold text-teal-100">1차시</p>
+              <p className="text-sm font-bold text-teal-100">{nextLesson ? `${nextLesson.no}차시` : '학습 완료'}</p>
               <h2 className="mt-1 font-heading text-2xl font-black tracking-[-0.03em] text-white sm:text-3xl">
-                코딩은 어떻게 발전해 왔을까?
+                {nextLesson ? nextLesson.title : '10번의 AI 코딩 모험을 마쳤어요!'}
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-teal-50/90 sm:text-base">
-                가은이의 로봇 이야기에서 시작해 기계어, 어셈블리어, 블록 코딩과
-                AI 코딩의 변화를 알아봅니다.
+                {nextLesson ? '저장한 활동을 이어서 하고, 실행 결과와 생각을 확인해요.' : '완료한 수업을 다시 열어 나의 활동과 성찰을 살펴볼 수 있어요.'}
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 {/* oxlint-disable-next-line next/no-html-link-for-pages */}
                 <a
-                  href="/lesson/1"
+                  href={nextLesson ? `/lesson/${nextLesson.no}` : '#lessons'}
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-extrabold text-teal-900 transition-colors hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/50"
                 >
-                  수업 시작하기
+                  {nextLesson ? nextLesson.started ? '수업 이어하기' : '수업 시작하기' : '완료한 수업 보기'}
                   <ArrowRight className="size-4.5" />
                 </a>
-                <div className="flex items-center gap-2 px-2 text-sm font-semibold text-teal-50">
+                {nextLesson && <div className="flex items-center gap-2 px-2 text-sm font-semibold text-teal-50">
                   <span className="inline-block size-2 rounded-full bg-orange-300" />
                   약 40분
-                </div>
+                </div>}
               </div>
             </div>
             <div className="lesson-orbit" aria-hidden="true">
@@ -205,7 +214,7 @@ export default function HomePage() {
                 <Sparkles className="size-9" />
               </div>
             </div>
-          </section>
+          </section>}
 
           <section id="lessons" className="mt-9">
             <div className="mb-4 flex items-end justify-between gap-4">
@@ -218,40 +227,34 @@ export default function HomePage() {
                 </p>
               </div>
               <span className="hidden text-sm font-bold text-primary sm:block">
-                진행 중 1
+                {course.error ? '진도 확인 필요' : `완료 ${course.completedCount} · 진행 중 ${course.inProgressCount}`}
               </span>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {lessons.map((lesson) => (
+              {lessonCards.map((lesson) => (
                 /* oxlint-disable-next-line next/no-html-link-for-pages */
                 <a
                   href={`/lesson/${lesson.no}`}
                   key={lesson.no}
-                  className={`lesson-card lesson-${lesson.status}`}
+                  className={`lesson-card lesson-${course.error ? 'open' : lesson.status === 'open' && lesson.no === course.nextLessonNo ? 'current' : lesson.status}`}
                   aria-label={`${lesson.no}차시 ${lesson.title}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="lesson-number">{lesson.no}</div>
-                    {lesson.status === 'done' && (
-                      <CheckCircle2 className="size-5 text-emerald-600" />
+                    {!course.error && lesson.status === 'done' && (
+                      <Badge className="bg-emerald-100 text-emerald-800"><CheckCircle2 className="size-4" />학습 완료</Badge>
                     )}
-                    {lesson.status === 'current' && (
+                    {!course.error && (lesson.status === 'current' || lesson.no === course.nextLessonNo) && (
                       <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
-                        진행 중
+                        {lesson.started ? '진행 중' : '다음 차시'}
                       </Badge>
-                    )}
-                    {lesson.status === 'locked' && (
-                      <LockKeyhole className="size-4.5 text-stone-400" />
                     )}
                   </div>
                   <h3 className="mt-4 min-h-12 font-bold leading-6">
                     {lesson.title}
                   </h3>
                   <p className="mt-2 text-xs font-semibold text-muted-foreground">
-                    {lesson.status === 'done' && '학습 완료'}
-                    {lesson.status === 'current' && '지금 학습할 수 있어요'}
-                    {lesson.status === 'open' && '곧 이어서 학습해요'}
-                    {lesson.status === 'locked' && '아직 열리지 않았어요'}
+                    {course.error ? '저장 기록을 다시 확인해 주세요' : lesson.status === 'done' ? '저장한 활동 다시 보기' : lesson.started ? '저장한 활동 이어하기' : '학습을 시작할 수 있어요'}
                   </p>
                 </a>
               ))}

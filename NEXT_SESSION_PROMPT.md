@@ -2,7 +2,7 @@
 
 현재 작업 폴더 C:\Users\rhkdd\OneDrive\문서\2학기 전학공의 AI 코딩 교실은 **1~10차시 콘텐츠 개선 구현·차시별 검증·기존 사이트 게시까지 완료**했습니다. 사용 한도로 중단되었던 나머지 작업도 끝났습니다. 미착수/부분 구현 차시는 없습니다.
 
-최종 운영 기준은 **version51 / e1330d1ea5608badfe1ca92ec79b0c58cb0c3da0**입니다. 기존 Site appgprj_6a962dcd21f08191876edad89331f7c3, public URL https://hj-ai-coding-class-2026.rhkdduavud.chatgpt.site 를 유지했습니다.
+최종 운영 기준은 **version53 / e0aeb2c9696f2c8ad0aad1e9f2a868989424d72f**입니다. 기존 Site appgprj_6a962dcd21f08191876edad89331f7c3, public URL https://hj-ai-coding-class-2026.rhkdduavud.chatgpt.site 를 유지했습니다.
 
 다음 작업은 새 사용자 지시나 실제 수업 관찰 결과에서 시작하세요. 먼저 web/AGENTS.md, SESSION_HANDOFF.md, LESSON_EDITING_GUIDE.md, LESSON_CONTENT_IMPROVEMENT_RESULTS.md를 읽고 양쪽 Git과 최신 Site 상태를 확인하세요. LESSON_CONTENT_IMPROVEMENT_PLAN.md와 LESSON_CONTENT_REVIEW_RESULTS.md는 당시 개선 근거이며 그 안의 미착수 표현을 현재 상태로 해석하지 마세요. 완료한 차시를 다시 처음부터 구현하지 마세요.
 
@@ -12,6 +12,8 @@
 
 루트와 web은 별도 Git입니다. 기존 미커밋 문서, web/supabase/tests/, tests/staff-access-live.mjs, 이전 staging/archive를 보존하세요. 비밀정보와 실제 학생 상세/CSV를 열거나 출력하지 마세요. 검증에는 전용 계정만 사용하고 로그아웃하세요.
 
-최종 전체 build·회귀31개·차시별 UI/공개 저장 복원이 통과했습니다. 2~7 page의 기존 lint 오류, 홈 진도 정적 표시는 별도 항목입니다. 알려진 문제와 검증하지 않은 범위는 SESSION_HANDOFF.md를 따르세요. 새 콘텐츠를 수정한다면 관련 검증 후 같은 Site에 게시하고 결과/재개 문서를 최신 상태로 갱신하세요.
+최종 전체 build·회귀38개·차시별 UI/공개 저장 복원이 통과했습니다. 2~7 page의 기존 lint 오류는 별도 항목입니다. 알려진 문제와 검증하지 않은 범위는 SESSION_HANDOFF.md를 따르세요. 새 콘텐츠를 수정한다면 관련 검증 후 같은 Site에 게시하고 결과/재개 문서를 최신 상태로 갱신하세요.
 
 최근 게시판 링크 수정은 version51에 반영되었습니다. REFLECTION_BOARD_LINK_FIX_RESULTS.md를 참고하세요. 공통 게시판 컴포넌트의 버튼 렌더링 경고는 해당 링크 교체로 제거했으며 전체 lint는 기존 staging 산출물로 실패합니다.
+
+학생 홈 진도 고정과 단계 이동 완료 해제는 version53에서 수정했습니다. STUDENT_HOME_PROGRESS_FIX_RESULTS.md를 참고하세요. 단계 이동은 완료를 유지하고 실제 활동 수정은 해제하는 동작을 보존하세요. 과거 미완료 기록은 일괄 완료 처리하지 마세요.
