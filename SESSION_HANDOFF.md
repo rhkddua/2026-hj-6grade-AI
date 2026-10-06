@@ -3,16 +3,21 @@
 최종 갱신: 2026-10-06(KST)
 
 **1~10차시 콘텐츠 개선 구현·검증·기존 사이트 게시 완료. 미착수 차시는 없다.**
-최종 운영 기준은 **version50 / 43398c892ebca1f8d6dd8cac61094f7f33d6c25f**이다. 차시별 근거는 [구현 결과](LESSON_CONTENT_IMPROVEMENT_RESULTS.md)에 있다. 다음 재개는 실제 수업 관찰 결과나 사용자가 지정한 추가 수정에서 시작한다.
+최종 운영 기준은 **version51 / e1330d1ea5608badfe1ca92ec79b0c58cb0c3da0**이다. 차시별 근거는 [구현 결과](LESSON_CONTENT_IMPROVEMENT_RESULTS.md)에 있다. 다음 재개는 실제 수업 관찰 결과나 사용자가 지정한 추가 수정에서 시작한다.
 
 ## 운영 상태
 
 - 기존 Site: AI 코딩 교실 / appgprj_6a962dcd21f08191876edad89331f7c3 / public.
 - 공개 URL: https://hj-ai-coding-class-2026.rhkdduavud.chatgpt.site
-- version50 배포 성공: appgdep_6ac44008a5688191ab8eb2fa6fac1f08, 환경 revision2 유지.
+- version51 배포 성공: appgdep_6ac4487aefb881918e700e11854d4fff, 환경 revision2 유지.
 - Supabase ujhcwxscxepbttqcysal, 기존 React/Vinext/Vite/TypeScript 구조·의존성·DB/RLS·계정·교사 권한 유지.
 - 완료된 담임교사 반별 접근 제한/version39를 재적용하지 않는다. 필요할 때만 TEACHER_CLASS_ACCESS_RESULTS_2026-10-05.md를 참고한다.
 - 학생 전원 Canva 계정과 AI 코드가 준비되어 있다. 5~10차시는 웹 계획/기록→Canva 실제 제작·시험·수정→웹 복귀 수업이다. 실행 공유 URL과 다시 수정하는 원본 프로젝트/AI 코드 대화를 구별한다.
+
+## 최근 수정
+
+- 한 문장 게시판 보기 링크를 모든 차시의 공통 컴포넌트에서 직접 이동 링크로 수정했다. 출발 차시 필터의 hydration 복원도 수정했다. 공개 클릭/새로고침, 로컬 모바일/Enter, 변경파일 lint·전체 build를 확인했다. 상세는 REFLECTION_BOARD_LINK_FIX_RESULTS.md.
+- 전체 lint는 기존 staging 빌드 산출물 때문에 실패한다. 게시판 전송·차시 저장·인증·DB/RLS는 변경하지 않았다.
 
 ## 구현과 검증
 
@@ -29,7 +34,7 @@
 ## 알려진 문제와 환경
 
 - 2~7 page에는 기존 React compiler/ref/effect/deps/status/내부 링크 관련 lint 오류가 남는다(각7개). 변경 content/lib/tests는 통과했으며 이를 전체 저장소 lint 통과로 표현하지 않는다.
-- 공통 ReflectionBoardActions의 Base UI nativeButton 경고는 기존 문제다. 홈의 현재 차시/진도 안내는 기존 정적 표시이므로 실제 완료 기록 확인은 차시 복원·전용 DB 요약을 사용했다. 두 항목 모두 이번 콘텐츠 수정에 섞지 않았다.
+- 홈의 현재 차시/진도 안내는 기존 정적 표시이므로 실제 완료 기록 확인은 차시 복원·전용 DB 요약을 사용했다. 홈 표시는 이번 수정 범위 밖이다.
 - Windows 스킬 build helper의 npm.cmd 경로 오류는 PowerShell npm run build 성공 결과를 게시 workflow에 재사용해 해결했다. 게시 명령에만 Git bin PATH 및 TAR_OPTIONS=--force-local 적용. 프레임워크나 lockfile 변경 없음.
 - source credential은 세션 메모리/숨겨진 stdin만 사용한다. TEST_ACCOUNT.md·.env.local·토큰 값을 문서/로그/Git에 남기지 않는다.
 - 루트와 web은 별도 Git이다. 루트의 기존 미커밋 문서·web/supabase/tests/와 web의 기존 미추적 tests/staff-access-live.mjs를 보존한다. reset/clean/임의 checkout하지 않는다. 상위 GitHub 커밋·push는 하지 않았다.

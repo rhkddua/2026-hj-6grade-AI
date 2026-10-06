@@ -8,7 +8,7 @@ import {
   RefreshCw,
   ShieldCheck,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -25,6 +25,16 @@ function initialLessonFilter() {
     new URLSearchParams(window.location.search).get('lesson'),
   );
   return Number.isInteger(lesson) && lesson >= 1 && lesson <= 10 ? lesson : 1;
+}
+
+// Native navigation creates a new page. Read its query after hydration;
+// the server has no browser URL, and manual filter choices take precedence.
+function subscribeToInitialUrl() {
+  return () => undefined;
+}
+
+function serverLessonFilter() {
+  return 1;
 }
 
 function formatDate(value: string) {
@@ -75,9 +85,13 @@ function ReflectionCards({ entries }: { entries: ReflectionBoardEntry[] }) {
 
 export default function ReflectionBoardPage() {
   const { user, loading: authLoading } = useStudentSession();
-  const [selectedLesson, setSelectedLesson] = useState<number | null>(
+  const urlLesson = useSyncExternalStore(
+    subscribeToInitialUrl,
     initialLessonFilter,
+    serverLessonFilter,
   );
+  const [lessonSelection, setSelectedLesson] = useState<number | null>();
+  const selectedLesson = lessonSelection === undefined ? urlLesson : lessonSelection;
   const [entries, setEntries] = useState<ReflectionBoardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

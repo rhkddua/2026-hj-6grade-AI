@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   ArrowRight,
   LoaderCircle,
@@ -9,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { publishLessonReflection } from '@/lib/reflection-board';
 
 type ShareStatus = 'idle' | 'sending' | 'sent' | 'error';
@@ -77,14 +76,15 @@ export function ReflectionBoardActions({
               ? '게시판에 다시 보내기'
               : '게시판에 보내기'}
         </Button>
-        <Button
-          render={<Link href={`/reflection-board?lesson=${lessonNo}`} />}
-          variant="outline"
-          className="bg-white"
+        {/* Use native navigation so button event composition cannot swallow the link. */}
+        {/* oxlint-disable-next-line next/no-html-link-for-pages */}
+        <a
+          href={`/reflection-board?lesson=${lessonNo}`}
+          className={`${buttonVariants({ variant: 'outline' })} bg-white`}
         >
           한 문장 게시판 보기
           <ArrowRight />
-        </Button>
+        </a>
       </div>
       <output
         aria-live="polite"
