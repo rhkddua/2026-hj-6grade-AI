@@ -1,32 +1,66 @@
-import { test } from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getStudentBadge } from '../lib/student-badge.ts';
+import { getStudentBadges } from '../lib/student-badge.ts';
+import { summarizeCourseProgress } from '../lib/student-course-progress.ts';
 
-const saved = { lessonNo: 1, currentStep: 5, quizScore: 2, reflection: '배움 기록을 열 글자 이상 작성했어요.', completed: false };
-test('새 학생은 배지가 없고 모든 조건이 남아 있다', () => {
-  const badge = getStudentBadge(null);
-  assert.equal(badge.earned, false);
-  assert.deepEqual(badge.requirements.map(item => item.done), [false, false, false]);
+const record = (lessonNo, completed, currentStep = 5) => ({ lessonNo, completed, currentStep });
+const collection = records => getStudentBadges(summarizeCourseProgress(records).lessons);
+
+test('기록이 없으면 열 개 배지를 모두 도전 전으로 표시한다', () => {
+  const result = collection([]);
+  assert.equal(result.badges.length, 10);
+  assert.equal(result.earnedCount, 0);
+  assert.equal(result.allEarned, false);
+  assert.equal(result.nextBadge.lessonNo, 1);
+  assert.ok(result.badges.every(badge => !badge.earned && !badge.started));
 });
-test('퀴즈와 성찰만으로 배지를 발급하지 않는다', () => {
-  const badge = getStudentBadge(saved);
-  assert.equal(badge.earned, false);
-  assert.deepEqual(badge.requirements.map(item => item.done), [true, true, false]);
+for (let lessonNo = 1; lessonNo <= 10; lessonNo++) {
+  test(`${lessonNo}차시 완료로 해당 배지만 획득한다`, () => {
+    const result = collection([record(lessonNo, true, 1)]);
+    assert.equal(result.earnedCount, 1);
+    assert.deepEqual(result.badges.filter(badge => badge.earned).map(badge => badge.lessonNo), [lessonNo]);
+  });
+}
+test('1차시가 없어도 완료한 2~10차시 배지를 모두 획득한다', () => {
+  const result = collection(Array.from({ length: 9 }, (_, index) => record(index + 2, true)));
+  assert.equal(result.earnedCount, 9);
+  assert.equal(result.badges[0].earned, false);
+  assert.ok(result.badges.slice(1).every(badge => badge.earned));
 });
-test('1차시 완료 저장 후 획득 상태를 복원한다', () => {
-  const badge = getStudentBadge(JSON.parse(JSON.stringify({ ...saved, completed: true })));
-  assert.equal(badge.earned, true);
-  assert.ok(badge.requirements.every(item => item.done));
+test('순서 밖 완료를 보존하고 다음 도전할 차시를 안내한다', () => {
+  const result = collection([record(10, true), record(3, true), record(1, false)]);
+  assert.deepEqual(result.badges.filter(badge => badge.earned).map(badge => badge.lessonNo), [3, 10]);
+  assert.equal(result.nextBadge.lessonNo, 1);
+  assert.equal(result.badges[0].started, true);
 });
-test('답안 수정으로 완료가 해제되면 다시 도전 상태가 된다', () => {
-  assert.equal(getStudentBadge({ ...saved, completed: false, quizScore: 1 }).earned, false);
-  assert.equal(getStudentBadge({ ...saved, quizScore: 1 }).requirements[0].done, false);
+test('열 차시가 모두 완료되면 열 개 획득과 전체 완료 상태를 표시한다', () => {
+  const result = collection(Array.from({ length: 10 }, (_, index) => record(index + 1, true)));
+  assert.equal(result.earnedCount, 10);
+  assert.equal(result.allEarned, true);
+  assert.equal(result.nextBadge, null);
+  assert.equal(result.badges[0].name, '첫걸음 탐험가');
 });
-test('공백과 10자 미만 성찰은 남은 조건으로 표시한다', () => {
-  assert.equal(getStudentBadge({ ...saved, reflection: '   짧은 문장  ' }).requirements[1].done, false);
+test('마지막 단계에 도달해도 완료 저장이 없으면 배지를 발급하지 않는다', () => {
+  const result = collection([record(2, false, 5), record(8, false, 5)]);
+  assert.equal(result.earnedCount, 0);
+  assert.equal(result.badges[1].started, true);
+  assert.equal(result.badges[7].earned, false);
 });
-test('다른 차시의 완료로 첫걸음 배지를 받지 않는다', () => {
-  const badge = getStudentBadge({ ...saved, lessonNo: 2, completed: true });
-  assert.equal(badge.earned, false);
-  assert.ok(badge.requirements.every(item => !item.done));
+test('단계만 이동한 완료 기록은 유지하고 완료 해제된 차시는 미획득으로 돌아간다', () => {
+  const saved = Array.from({ length: 10 }, (_, index) => record(index + 1, index !== 5, 1));
+  const result = collection(saved);
+  assert.equal(result.earnedCount, 9);
+  assert.equal(result.badges[5].earned, false);
+  assert.ok(result.badges.filter(badge => badge.lessonNo !== 6).every(badge => badge.earned));
+});
+test('범위 밖 기록을 무시하고 중복 기록으로 획득 수를 늘리지 않는다', () => {
+  const result = collection([record(0, true), record(11, true), record(2, true), record(2, true)]);
+  assert.equal(result.earnedCount, 1);
+  assert.equal(result.badges.length, 10);
+});
+test('저장 기록을 다시 읽어도 같은 배지와 진도 완료 수를 표시한다', () => {
+  const records = [record(1, true), record(4, true), record(9, false)];
+  const restored = JSON.parse(JSON.stringify(records));
+  assert.deepEqual(collection(restored), collection(records));
+  assert.equal(collection(restored).earnedCount, summarizeCourseProgress(restored).completedCount);
 });

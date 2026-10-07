@@ -18,7 +18,6 @@ export type AdminProgress = {
   lessonNo: number;
   currentStep: number;
   quizScore: number | null;
-  reflection: string;
   completed: boolean;
   updatedAt: string;
 };
@@ -41,7 +40,6 @@ type ProgressRow = {
   lesson_no: number;
   current_step: number;
   quiz_score: number | null;
-  reflection: string;
   completed: boolean;
   updated_at: string;
 };
@@ -58,7 +56,7 @@ export async function loadAdminDashboard(): Promise<AdminDashboardData> {
       .overrideTypes<StudentRow[], { merge: false }>(),
     supabase
       .from('lesson_progress')
-      .select('user_id,lesson_no,current_step,quiz_score,reflection,completed,updated_at')
+      .select('user_id,lesson_no,current_step,quiz_score,completed,updated_at')
       .order('updated_at', { ascending: false })
       .overrideTypes<ProgressRow[], { merge: false }>(),
   ]);
@@ -68,15 +66,16 @@ export async function loadAdminDashboard(): Promise<AdminDashboardData> {
 
   const studentRows = studentResult.data ?? [];
   const studentUserIds = new Set(studentRows.map((row) => row.user_id));
-  const progress = (progressResult.data ?? []).filter((row) => studentUserIds.has(row.user_id)).map((row) => ({
-    userId: row.user_id,
-    lessonNo: row.lesson_no,
-    currentStep: row.current_step,
-    quizScore: row.quiz_score,
-    reflection: row.reflection ?? '',
-    completed: row.completed,
-    updatedAt: row.updated_at,
-  }));
+  const progress = (progressResult.data ?? [])
+    .filter((row) => studentUserIds.has(row.user_id))
+    .map((row) => ({
+      userId: row.user_id,
+      lessonNo: row.lesson_no,
+      currentStep: row.current_step,
+      quizScore: row.quiz_score,
+      completed: row.completed,
+      updatedAt: row.updated_at,
+    }));
 
   const byUser = new Map<string, AdminProgress[]>();
   for (const item of progress) {
@@ -87,9 +86,16 @@ export async function loadAdminDashboard(): Promise<AdminDashboardData> {
 
   const students = studentRows.map((row) => {
     const items = byUser.get(row.user_id) ?? [];
-    const quizScores = items.flatMap((item) => item.quizScore === null ? [] : [item.quizScore]);
+    const quizScores = items.flatMap((item) =>
+      item.quizScore === null ? [] : [item.quizScore],
+    );
     const latest = items.reduce<AdminProgress | null>((current, item) => {
-      if (!current || new Date(item.updatedAt).getTime() > new Date(current.updatedAt).getTime()) return item;
+      if (
+        !current ||
+        new Date(item.updatedAt).getTime() >
+          new Date(current.updatedAt).getTime()
+      )
+        return item;
       return current;
     }, null);
 
@@ -101,9 +107,14 @@ export async function loadAdminDashboard(): Promise<AdminDashboardData> {
       studentNo: row.student_no,
       completedLessons: items.filter((item) => item.completed).length,
       startedLessons: items.length,
-      averageQuizScore: quizScores.length > 0
-        ? Math.round((quizScores.reduce((sum, score) => sum + score, 0) / quizScores.length) * 10) / 10
-        : null,
+      averageQuizScore:
+        quizScores.length > 0
+          ? Math.round(
+              (quizScores.reduce((sum, score) => sum + score, 0) /
+                quizScores.length) *
+                10,
+            ) / 10
+          : null,
       latestLesson: latest?.lessonNo ?? null,
       latestUpdatedAt: latest?.updatedAt ?? null,
     };

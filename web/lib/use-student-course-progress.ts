@@ -24,7 +24,7 @@ export function useStudentCourseProgress(userId: string | undefined) {
         ? { ...previous, loading: true }
         : { userId, records: [], loading: true, error: false, ready: false });
       try {
-        const records = await loadStudentCourseProgress();
+        const records = await loadStudentCourseProgress(userId);
         if (active && request === revision) {
           setState({ userId, records, loading: false, error: false, ready: true });
         }
@@ -49,6 +49,7 @@ export function useStudentCourseProgress(userId: string | undefined) {
   return {
     ...summarizeCourseProgress(currentUser ? state.records : []),
     loading: !currentUser || (!state.ready && state.loading),
+    refreshing: currentUser && state.ready && state.loading,
     error: currentUser && state.error,
     retry: () => setAttempt(value => value + 1),
   };

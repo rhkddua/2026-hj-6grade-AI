@@ -18,9 +18,10 @@ async function getStudentUserId() {
   return data.user.id;
 }
 
-export async function loadStudentCourseProgress(): Promise<CourseLessonRecord[]> {
+export async function loadStudentCourseProgress(expectedUserId?: string): Promise<CourseLessonRecord[]> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase가 설정되지 않았습니다.');
   const userId = await getStudentUserId();
+  if (expectedUserId && userId !== expectedUserId) throw new Error('로그인 계정이 변경되었습니다. 다시 조회해 주세요.');
   const { data, error } = await supabase.from('lesson_progress')
     .select('lesson_no,current_step,completed')
     .eq('user_id', userId)

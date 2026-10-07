@@ -24,7 +24,7 @@ import {
   ProgressValue,
 } from '@/components/ui/progress';
 import { signOutStudent, useStudentSession } from '@/lib/student-auth';
-import { useStudentBadge } from '@/lib/use-student-badge';
+import { getStudentBadges } from '@/lib/student-badge';
 import { useStudentCourseProgress } from '@/lib/use-student-course-progress';
 
 const lessons = [
@@ -42,8 +42,8 @@ const lessons = [
 
 export default function HomePage() {
   const { user, profile, loading } = useStudentSession();
-  const badge = useStudentBadge(user?.id);
   const course = useStudentCourseProgress(user?.id);
+  const badge = getStudentBadges(course.lessons);
   const lessonCards = lessons.map(lesson => ({
     ...lesson,
     ...course.lessons[lesson.no - 1],
@@ -314,7 +314,7 @@ export default function HomePage() {
                     이번 주 배지
                   </h2>
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                    {badge.loading ? '배지 기록을 불러오는 중…' : badge.error ? '기록을 확인하지 못했어요. 눌러서 다시 확인해 주세요.' : badge.earned ? '‘첫걸음 탐험가’ 획득 완료! 나의 배지를 확인해 보세요.' : '‘첫걸음 탐험가’에 도전해요. 눌러서 남은 조건을 확인하세요.'}
+                    {course.error ? '기록을 확인하지 못했어요. 눌러서 다시 확인해 주세요.' : badge.allEarned ? '10개 배지를 모두 획득했어요! 나의 배지를 확인해 보세요.' : badge.earnedCount > 0 ? `배지 ${badge.earnedCount}/10개 획득! 다음은 ‘${badge.nextBadge?.name}’에 도전해요.` : '1~10차시를 완료하고 나의 배지를 모아 보세요.'}
                   </p>
                 </div>
               </div>

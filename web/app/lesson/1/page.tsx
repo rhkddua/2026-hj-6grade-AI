@@ -1061,15 +1061,28 @@ export default function LessonOnePage() {
                       어셈블리어·기계어로, 일부를 C로 만들었다고 설명해요.
                       여러 언어를 함께 사용한 실제 사례예요.
                     </p>
-                    <a
-                      href="https://www.chrissawyergames.com/faq3.htm"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-violet-800 underline decoration-violet-400 underline-offset-4"
-                    >
-                      개발자 공식 FAQ 열기
-                      <ExternalLink className="size-4" />
-                    </a>
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+                      <a
+                        href="https://www.chrissawyergames.com/faq3.htm"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold text-violet-800 underline decoration-violet-400 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600"
+                      >
+                        개발자 공식 FAQ 열기
+                        <span className="sr-only"> (새 탭에서 열림)</span>
+                        <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
+                      </a>
+                      <a
+                        href="https://youtu.be/BJFKPMUQKJ4?si=hnBedlYkoaZV9n20"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold text-violet-800 underline decoration-violet-400 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600"
+                      >
+                        롤러코스터 게임 실제 모습 보기
+                        <span className="sr-only"> (새 탭에서 열림)</span>
+                        <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
+                      </a>
+                    </div>
                   </div>
                   <div
                     className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4"

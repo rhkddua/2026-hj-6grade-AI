@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   AlertTriangle, BarChart3, BookOpenCheck, CheckCircle2, ChevronRight,
   Download, LayoutDashboard, LoaderCircle, LogOut, RefreshCw,
-  Search, ShieldCheck, TrendingUp, UserRound, Users, MessageSquareQuote,
+  Search, ShieldCheck, TrendingUp, UserRound, Users, MessageSquareQuote, Rocket,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -15,17 +15,20 @@ import { Progress } from '@/components/ui/progress';
 import { signOutAdmin, useAdminSession } from '@/lib/admin-auth';
 import { AdminProgress, AdminStudent, loadAdminDashboard } from '@/lib/admin-dashboard';
 import { AdminReflectionBoard } from '@/components/admin-reflection-board';
+import { AdminStudentApps } from '@/components/admin-student-apps';
+import { AdminStudentDetail } from '@/components/admin-student-detail';
 import { createCsv } from '@/lib/safe-csv';
 
 const ACTIVE_LESSONS = 10;
 
-type AdminView = 'dashboard' | 'students' | 'lessons' | 'board';
+type AdminView = 'dashboard' | 'students' | 'lessons' | 'board' | 'apps';
 
 const ADMIN_VIEWS = [
   { id: 'dashboard' as const, label: '대시보드', icon: LayoutDashboard },
   { id: 'students' as const, label: '학생 현황', icon: Users },
   { id: 'lessons' as const, label: '차시별 진도', icon: BookOpenCheck },
   { id: 'board' as const, label: '게시판 관리', icon: MessageSquareQuote },
+  { id: 'apps' as const, label: '앱 보관함', icon: Rocket },
 ];
 
 const ADMIN_VIEW_COPY: Record<AdminView, { eyebrow: string; title: string; description: string }> = {
@@ -47,7 +50,12 @@ const ADMIN_VIEW_COPY: Record<AdminView, { eyebrow: string; title: string; descr
   board: {
     eyebrow: '게시글 관리',
     title: '게시판 관리',
-    description: '게시글과 작성 계정을 확인하고 공개 또는 숨김 상태를 관리합니다.',
+    description: '게시글을 검색하고 선택하여 숨김, 공개 복원 또는 완전 삭제합니다.',
+  },
+  apps: {
+    eyebrow: '공유 링크 관리',
+    title: '앱 보관함 관리',
+    description: '학생이 등록한 앱을 검색하고 링크 수정, 숨김, 복원 또는 완전 삭제합니다.',
   },
 };
 
@@ -102,7 +110,7 @@ export default function AdminPage() {
   useEffect(() => {
     function syncViewFromHash() {
       const hash = window.location.hash.slice(1);
-      setActiveView(hash === 'students' || hash === 'lessons' || hash === 'board' ? hash : 'dashboard');
+      setActiveView(hash === 'students' || hash === 'lessons' || hash === 'board' || hash === 'apps' ? hash : 'dashboard');
     }
 
     syncViewFromHash();
@@ -144,9 +152,6 @@ export default function AdminPage() {
   }, [classFilter, lessonFilter, progress, search, students]);
 
   const selectedStudent = students.find((student) => student.userId === selectedUserId) ?? null;
-  const selectedProgress = selectedStudent
-    ? progress.filter((item) => item.userId === selectedStudent.userId).sort((a, b) => a.lessonNo - b.lessonNo)
-    : [];
   const completedRecords = progress.filter((item) => item.completed).length;
   const participatingStudents = students.filter((student) => student.startedLessons > 0).length;
   const totalPossible = students.length * ACTIVE_LESSONS;
@@ -178,10 +183,10 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <nav aria-label="모바일 관리자 메뉴" className="sticky top-18 z-20 grid grid-cols-4 border-b border-slate-200 bg-white p-2 shadow-sm lg:hidden">
+      <nav aria-label="모바일 관리자 메뉴" className="sticky top-18 z-20 grid grid-cols-3 gap-1 border-b border-slate-200 bg-white p-2 shadow-sm lg:hidden">
         {ADMIN_VIEWS.map((item) => {
           const isActive = activeView === item.id;
-          return <button key={item.id} type="button" aria-current={isActive ? 'page' : undefined} onClick={() => openView(item.id)} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-xs font-black transition-colors ${isActive ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100'}`}><item.icon className="size-4" />{item.label}</button>;
+          return <button key={item.id} type="button" aria-current={isActive ? 'page' : undefined} onClick={() => openView(item.id)} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-sm font-black transition-colors ${isActive ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100'}`}><item.icon className="size-4" />{item.label}</button>;
         })}
       </nav>
 
@@ -199,10 +204,10 @@ export default function AdminPage() {
         <main id={activeView} className="min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <section className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div><p className="text-sm font-bold text-teal-700">{activeViewCopy.eyebrow}</p><h1 className="mt-1 font-heading text-3xl font-black tracking-[-0.04em] sm:text-4xl">{activeViewCopy.title}</h1><p className="mt-2 text-base text-slate-600">{activeViewCopy.description}</p><output className="mt-2 block text-sm font-bold text-teal-700">조회·관리 범위: {scopeLabel}</output></div>
-            {activeView !== 'board' && <div className="flex flex-wrap gap-2">{(activeView === 'dashboard' || activeView === 'students') && <Button variant="outline" onClick={() => downloadCsv(filteredStudents)} disabled={loading || !!error || filteredStudents.length === 0}><Download data-icon="inline-start" />CSV 내려받기</Button>}<Button onClick={() => void refresh()} disabled={loading} className="bg-slate-950 text-white hover:bg-slate-800"><RefreshCw className={loading ? 'animate-spin' : ''} data-icon="inline-start" />새로고침</Button></div>}
+            {activeView !== 'board' && activeView !== 'apps' && <div className="flex flex-wrap gap-2">{(activeView === 'dashboard' || activeView === 'students') && <Button variant="outline" onClick={() => downloadCsv(filteredStudents)} disabled={loading || !!error || filteredStudents.length === 0}><Download data-icon="inline-start" />CSV 내려받기</Button>}<Button onClick={() => void refresh()} disabled={loading} className="bg-slate-950 text-white hover:bg-slate-800"><RefreshCw className={loading ? 'animate-spin' : ''} data-icon="inline-start" />새로고침</Button></div>}
           </section>
 
-          {error && activeView !== 'students' && <div role="alert" className="mt-5 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</div>}
+          {error && activeView !== 'students' && activeView !== 'apps' && <div role="alert" className="mt-5 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">{error}</div>}
 
           {activeView === 'dashboard' && <><section className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
@@ -233,6 +238,7 @@ export default function AdminPage() {
           </section>}
 
           {activeView === 'board' && <AdminReflectionBoard />}
+          {activeView === 'apps' && <AdminStudentApps />}
 
           {activeView === 'lessons' && <section className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
             <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><div className="flex items-center gap-3"><div className="grid size-11 place-items-center rounded-2xl bg-violet-100 text-violet-700"><BarChart3 className="size-5" /></div><div><h2 className="font-heading text-lg font-black">차시별 완료 현황</h2><p className="text-sm text-slate-500">완료 저장된 학생 수</p></div></div><div className="mt-6 space-y-4">{Array.from({ length: ACTIVE_LESSONS }, (_, index) => index + 1).map((lessonNo) => { const count = progress.filter((item) => item.lessonNo === lessonNo && item.completed).length; const percent = students.length > 0 ? Math.round((count / students.length) * 100) : 0; return <div key={lessonNo}><div className="mb-2 flex items-center justify-between text-sm font-bold"><span>{lessonNo}차시</span><span>{count}명 · {percent}%</span></div><Progress value={percent} /></div>; })}</div></article>
@@ -241,7 +247,7 @@ export default function AdminPage() {
         </main>
       </div>
 
-      {selectedStudent && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/65 p-4" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelectedUserId(null); }}><dialog open aria-labelledby="student-detail-title" className="relative m-0 max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 text-slate-950 shadow-2xl sm:p-8"><div className="flex items-start justify-between gap-4"><div><Badge className="bg-teal-100 text-teal-800 hover:bg-teal-100">{selectedStudent.grade}학년 {selectedStudent.classNo}반 {selectedStudent.studentNo}번</Badge><h2 id="student-detail-title" className="mt-3 font-heading text-2xl font-black">{selectedStudent.name} 학생</h2><p className="mt-1 text-sm text-slate-500">차시별 저장 상태와 성찰 기록</p></div><Button variant="outline" size="sm" onClick={() => setSelectedUserId(null)}>닫기</Button></div><div className="mt-6 space-y-3">{Array.from({ length: ACTIVE_LESSONS }, (_, index) => index + 1).map((lessonNo) => { const item = selectedProgress.find((entry) => entry.lessonNo === lessonNo); return <article key={lessonNo} className="rounded-2xl border border-slate-200 p-4"><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><div className={`grid size-9 place-items-center rounded-xl font-black ${item?.completed ? 'bg-emerald-100 text-emerald-700' : item ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-400'}`}>{lessonNo}</div><div><p className="font-black">{lessonNo}차시</p><p className="text-xs text-slate-500">{item ? `${item.currentStep}단계 · ${formatDate(item.updatedAt)}` : '아직 저장된 활동이 없습니다'}</p></div></div>{item?.completed ? <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">완료</Badge> : item ? <Badge variant="outline">진행 중</Badge> : null}</div>{item?.reflection && <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-700"><strong>성찰:</strong> {item.reflection}</div>}</article>; })}</div></dialog></div>}
+      {selectedStudent && <AdminStudentDetail key={selectedStudent.userId} student={selectedStudent} onClose={() => setSelectedUserId(null)} />}
     </div>
   );
 }
